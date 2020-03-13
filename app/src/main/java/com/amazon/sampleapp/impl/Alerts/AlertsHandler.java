@@ -35,7 +35,6 @@ public class AlertsHandler extends Alerts {
                           LoggerHandler logger ) {
         mActivity = activity;
         mLogger = logger;
-        setupGUI();
     }
 
     @Override
@@ -68,24 +67,5 @@ public class AlertsHandler extends Alerts {
     private void onRemoveAllAlerts( ) {
         mLogger.postInfo( sTag, "Removing all pending alerts from storage" );
         super.removeAllAlerts();
-    }
-
-    private void setupGUI() {
-
-        mStateText = mActivity.findViewById( R.id.alertState );
-
-        mActivity.findViewById( R.id.stopAlertButton ).setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick( View v ) { onLocalStop(); }
-            }
-        );
-
-        mActivity.findViewById( R.id.removeAlertsButton ).setOnClickListener(
-            new View.OnClickListener() {
-                @Override
-                public void onClick( View v ) { onRemoveAllAlerts(); }
-            }
-        );
     }
 }
