@@ -70,8 +70,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
         mCallId = "";
         mCallState = CallState.IDLE;
         mConnectionState = ConnectionState.DISCONNECTED;
-        setupGUI();
-        updateGUI();
 
         mDeviceConfiguration = new HashMap<>();
         mDeviceConfiguration.put(CallingDeviceConfigurationProperty.DTMF_SUPPORTED, false);
@@ -102,7 +100,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
 
         startDialingCallTimer( sDialingToRingingDelay );
         mLocalCallStarted = true;
-        updateGUI();
         return true;
     }
 
@@ -133,7 +130,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
 
         startDialingCallTimer( sDialingToRingingDelay );
         mLocalCallStarted = true;
-        updateGUI();
         return true;
     }
 
@@ -223,7 +219,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
             mCallState = CallState.OUTBOUND_RINGING;
             callStateChanged( CallState.OUTBOUND_RINGING, mCallId);
             logCallInfo("handleInitiateCall()");
-            updateGUI();
         }
     };
 
@@ -250,7 +245,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
             mCallState = CallState.INBOUND_RINGING;
             callStateChanged( mCallState, mCallId );
             logCallInfo("handleCallReceived()");
-            updateGUI();
         }
     };
 
@@ -261,7 +255,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
         mCallState = CallState.INBOUND_RINGING;
         callStateChanged( mCallState, callId );
         logCallInfo("handleRemoteInitiateCall()");
-        updateGUI();
     }
 
     private void handleAnswerCall() {
@@ -269,7 +262,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
         mCallState = CallState.ACTIVE;
         callStateChanged( CallState.ACTIVE, mCallId );
         logCallInfo("handleAnswerCall()");
-        updateGUI();
     }
 
     private void handleDeclineCall( boolean remoteDeclined ) {
@@ -283,7 +275,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
         callStateChanged( CallState.IDLE, mCallId );
         mCurrentCallNumber = "";
         mCallId = "";
-        updateGUI();
     }
 
     private void handleEndCall() {
@@ -298,7 +289,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
         callStateChanged( CallState.IDLE, mCallId );
         mCurrentCallNumber = "";
         mCallId = "";
-        updateGUI();
     }
 
     private void togglePhoneConnectionState( boolean enable ) {
@@ -406,128 +396,6 @@ public class PhoneCallControllerHandler extends PhoneCallController {
 
     private void onRemoteDecline() {
         handleDeclineCall( true );
-    }
-
-    /* For Updating GUI */
-
-    private void setupGUI() {
-
-        // Switch to toggle phone call connection state
-        View switchItem = mActivity.findViewById( R.id.togglePhoneCallConnection );
-        ( (TextView) switchItem.findViewById( R.id.text ) ).setText( R.string.phone_call_connection_switch);
-        SwitchCompat phoneCallConnectionSwitch = switchItem.findViewById( R.id.drawerSwitch );
-        phoneCallConnectionSwitch.setChecked( false );
-        phoneCallConnectionSwitch.setOnCheckedChangeListener(
-                new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        togglePhoneConnectionState(isChecked);
-                    }
-                }
-        );
-
-        mControlsLayout = mActivity.findViewById( R.id.phone_call_controller_config );
-        mControlsLayout.setVisibility(View.GONE);
-        mDeviceConfigurationButton = mActivity.findViewById( R.id.deviceConfiguration );
-        mCurrentCallNumberView = mActivity.findViewById( R.id.currentCallNumber );
-        mCallStateView = mActivity.findViewById( R.id.currentCallState );
-        mLastCalledNumberView = mActivity.findViewById( R.id.lastCalledNumber );
-        mCallingNumberText = mActivity.findViewById( R.id.localCallingNumber );
-        mLocalInitiateButton = mActivity.findViewById( R.id.localInitiate );
-        mLocalEndButton = mActivity.findViewById( R.id.localEnd );
-        mLocalAnswerDecline = mActivity.findViewById( R.id.localAnswerDecline);
-        mLocalAnswerButton = mActivity.findViewById( R.id.localAnswer );
-        mLocalDeclineButton = mActivity.findViewById( R.id.localDecline );
-        mRemoteInitiateButton = mActivity.findViewById( R.id.remoteInitiate );
-        mRemoteEndButton = mActivity.findViewById( R.id.remoteEnd );
-        mRemoteAnswerDecline = mActivity.findViewById( R.id.remoteAnswerDecline );
-        mRemoteAnswerButton = mActivity.findViewById( R.id.remoteAnswer );
-        mRemoteDeclineButton = mActivity.findViewById( R.id.remoteDecline );
-
-        mDeviceConfigurationButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onDeviceConfigurationUpdated(); }
-        });
-        mLocalInitiateButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onLocalInitiate(); }
-        });
-        mLocalEndButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onLocalEnd(); }
-        });
-        mLocalAnswerButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onLocalAnswer(); }
-        });
-        mLocalDeclineButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onLocalDecline(); }
-        });
-        mRemoteInitiateButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onRemoteInitiate(); }
-        });
-        mRemoteEndButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onRemoteEnd(); }
-        });
-        mRemoteAnswerButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onRemoteAnswer(); }
-        });
-        mRemoteDeclineButton.setOnClickListener( new View.OnClickListener() {
-            @Override
-            public void onClick( View v ) { onRemoteDecline(); }
-        });
-    }
-
-    private void updateGUI() {
-        mActivity.runOnUiThread( new Runnable() {
-            @Override
-            public void run() {
-                if ( mCallState == CallState.IDLE ) {
-                    mCallStateView.setText( "" );
-                } else {
-                    mCallStateView.setText( mCallState.toString() );
-                }
-                mCurrentCallNumberView.setText( mCurrentCallNumber );
-                mLastCalledNumberView.setText( mLastCalledNumber );
-
-                if ( mCallActivated ) {
-                    mLocalInitiateButton.setVisibility( View.GONE );
-                    mLocalEndButton.setVisibility( View.VISIBLE );
-                    mRemoteInitiateButton.setVisibility( View.GONE );
-                    mRemoteEndButton.setVisibility( View.VISIBLE );
-                    mLocalAnswerDecline.setVisibility( View.GONE );
-                    mRemoteAnswerDecline.setVisibility( View.GONE );
-                }
-                else if ( !mLocalCallStarted && !mRemoteCallStarted ) {
-                    mLocalInitiateButton.setVisibility( View.VISIBLE );
-                    mLocalEndButton.setVisibility( View.GONE );
-                    mRemoteInitiateButton.setVisibility( View.VISIBLE );
-                    mRemoteEndButton.setVisibility( View.GONE );
-                    mLocalAnswerDecline.setVisibility( View.GONE );
-                    mRemoteAnswerDecline.setVisibility( View.GONE );
-                }
-                else if ( mLocalCallStarted && !mRemoteCallStarted ) {
-                    mLocalInitiateButton.setVisibility( View.GONE );
-                    mLocalEndButton.setVisibility( View.VISIBLE );
-                    mRemoteInitiateButton.setVisibility( View.GONE );
-                    mRemoteEndButton.setVisibility( View.GONE );
-                    mLocalAnswerDecline.setVisibility( View.GONE );
-                    mRemoteAnswerDecline.setVisibility( View.VISIBLE );
-                }
-                else if ( !mLocalCallStarted && mRemoteCallStarted ) {
-                    mLocalInitiateButton.setVisibility( View.GONE );
-                    mLocalEndButton.setVisibility( View.GONE );
-                    mRemoteInitiateButton.setVisibility( View.GONE );
-                    mRemoteEndButton.setVisibility( View.VISIBLE );
-                    mLocalAnswerDecline.setVisibility( View.VISIBLE );
-                    mRemoteAnswerDecline.setVisibility( View.GONE );
-                }
-            }
-        });
     }
 
     private void logCallInfo(String msg) {

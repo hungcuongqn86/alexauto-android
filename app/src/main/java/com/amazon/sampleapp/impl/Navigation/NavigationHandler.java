@@ -55,40 +55,7 @@ public class NavigationHandler extends Navigation {
     }
 
     private void initialize() {
-        // initial UI setup when the app boots up
 
-        // Switch to toggle nav context loaded state
-        View switchItem = mActivity.findViewById( R.id.toggle_load_nav_state_file );
-        ( (TextView) switchItem.findViewById( R.id.text ) ).setText( R.string.load_navigation_state_file);
-        mNavigationStateUploadSwitch = switchItem.findViewById( R.id.drawerSwitch );
-        mNavigationStateUploadSwitch.setChecked( false );
-
-        // sets the listener on the navigation toggle controller
-        mNavigationStateUploadSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                View switchItem = mActivity.findViewById( R.id.navigation );
-                TextView fileStatus = switchItem.findViewById( R.id.navigation_state_file_status);
-                if(isChecked) {
-                    if(loadNavigationState()) {
-                        fileStatus.setText( R.string.navigation_state_file_loaded );
-                    } else {
-                        fileStatus.setText( R.string.navigation_state_file_error );
-                        mActivity.runOnUiThread(
-                                new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mNavigationStateUploadSwitch.setChecked( false );
-                                    }
-                                }
-                        );
-                    }
-                } else {
-                    unloadNavigationState();
-                    fileStatus.setText( R.string.navigation_state_file_not_loaded );
-                }
-            }
-        });
     }
 
     private void unloadNavigationState() {
