@@ -347,7 +347,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     /**
      * Configure the Engine and register platform interface instances
      * @param json JSON string with LVC config if LVC is supported, null otherwise.
-     * @throws RuntimeException
      */
     private void startEngine(String json) throws RuntimeException {
 
@@ -640,7 +639,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         mAddressBook.onInitialize();
         mAuthProvider.onInitialize();
         initTapToTalk();
-        initEarconsSettings();
     }
 
     /**
@@ -817,37 +815,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 }
             });
         }
-    }
-
-    private void initEarconsSettings() {
-        mDisableStartOfRequestEarcon = false;
-        mDisableEndOfRequestEarcon = false;
-
-        // Switch to toggle start of request
-        final View toggleStartOfRequestItem = findViewById( R.id.toggleEarconsStartOfRequest );
-        final SwitchCompat startOfRequestSwitch = toggleStartOfRequestItem.findViewById( R.id.drawerSwitch );
-        startOfRequestSwitch.setChecked( true );
-        startOfRequestSwitch.setOnCheckedChangeListener(
-            new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
-                    toggleStartOfRequestState( isChecked );
-                }
-            }
-        );
-
-        // Switch to toggle end of request
-        final View toggleEndtOfRequestItem = findViewById( R.id.toggleEarconsEndOfRequest );
-        final SwitchCompat endOfRequestSwitch = toggleEndtOfRequestItem.findViewById( R.id.drawerSwitch );
-        endOfRequestSwitch.setChecked( true );
-        endOfRequestSwitch.setOnCheckedChangeListener(
-            new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
-                    toggleEndOfRequestState( isChecked );
-                }
-            }
-        );
     }
 
     private void toggleEndOfRequestState( boolean isChecked ) {
