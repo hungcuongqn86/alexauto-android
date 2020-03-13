@@ -796,7 +796,6 @@
             </LinearLayout>
 
         </LinearLayout>
-
         <!-- Equalizer Controller -->
         <include
             layout="@layout/eq_section"
