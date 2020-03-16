@@ -72,15 +72,6 @@ import com.amazon.sampleapp.impl.AuthProvider.LoginWithAmazonCBL;
 import com.amazon.sampleapp.impl.EqualizerController.EqualizerConfiguration;
 import com.amazon.sampleapp.impl.ExternalMediaPlayer.MACCPlayer;
 import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
-import com.amazon.sampleapp.impl.LocalMediaSource.AMLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.BluetoothLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.CDLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.DABLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.LineInLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.SiriusXMLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.FMLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.SatelliteLocalMediaSource;
-import com.amazon.sampleapp.impl.LocalMediaSource.USBLocalMediaSource;
 
 import com.amazon.sampleapp.impl.EqualizerController.EqualizerControllerHandler;
 import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
@@ -179,16 +170,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private MediaPlayer mAudioCueStartTouch; // Touch-initiated listening audio cue
     private MediaPlayer mAudioCueEnd; // End of listening audio cue
     private MACCPlayer mMACCPlayer;
-
-    private CDLocalMediaSource mCDLocalMediaSource;
-    private DABLocalMediaSource mDABLocalMediaSource;
-    private SiriusXMLocalMediaSource mSIRUSXMLocalMediaSource;
-    private AMLocalMediaSource mAMLocalMediaSource;
-    private FMLocalMediaSource mFMLocalMediaSource;
-    private BluetoothLocalMediaSource mBTLocalMediaSource;
-    private LineInLocalMediaSource mLILocalMediaSource;
-    private SatelliteLocalMediaSource mSATRADLocalMediaSource;
-    private USBLocalMediaSource mUSBLocalMediaSource;
 
     private GlobalPresetHandler mGlobalPresetHandler;
 
@@ -514,51 +495,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
             Log.i("MACC", "registration succeeded");
         }
         mMACCPlayer.runDiscovery();
-
-        // Mock CD platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mCDLocalMediaSource = new CDLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock CD player Local Media Source platform interface" );
-
-        // Mock DAB platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mDABLocalMediaSource = new DABLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock DAB player Local Media Source platform interface" );
-
-        // Mock AM platform handler
-        if ( !mEngine.registerPlatformInterface(
-            mAMLocalMediaSource = new AMLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock AM radio player Local Media Source platform interface" );
-
-        // Mock SIRIUSXM platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mSIRUSXMLocalMediaSource = new SiriusXMLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock SIRIUSXM player Local Media Source platform interface" );
-
-        // Mock FM platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mFMLocalMediaSource = new FMLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock FM radio player Local Media Source platform interface" );
-
-        // Mock Bluetooth platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mBTLocalMediaSource = new BluetoothLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock Bluetooth player Local Media Source platform interface" );
-
-        // Mock Line In platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mLILocalMediaSource = new LineInLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock Line In player Local Media Source platform interface" );
-
-        // Mock Satellite Radio platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mSATRADLocalMediaSource = new SatelliteLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock Satellite radio player Local Media Source platform interface" );
-
-        // Mock USB platform handler
-        if ( !mEngine.registerPlatformInterface(
-                mUSBLocalMediaSource = new USBLocalMediaSource(this, mLogger)
-        ) ) throw new RuntimeException( "Could not register Mock USB player Local Media Source platform interface" );
 
         // Mock global preset
         if ( !mEngine.registerPlatformInterface(
