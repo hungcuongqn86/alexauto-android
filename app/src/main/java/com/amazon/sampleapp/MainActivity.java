@@ -69,7 +69,6 @@ import com.amazon.sampleapp.impl.AudioPlayer.AudioPlayerHandler;
 import com.amazon.sampleapp.impl.AuthProvider.AuthProviderHandler;
 import com.amazon.sampleapp.impl.AuthProvider.LoginWithAmazonCBL;
 
-import com.amazon.sampleapp.impl.AddressBook.AddressBookHandler;
 import com.amazon.sampleapp.impl.EqualizerController.EqualizerConfiguration;
 import com.amazon.sampleapp.impl.ExternalMediaPlayer.MACCPlayer;
 import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
@@ -136,7 +135,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private EqualizerControllerHandler mEqualizerControllerHandler;
     private NotificationsHandler mNotifications;
     private PhoneCallControllerHandler mPhoneCallController;
-    private AddressBookHandler mAddressBook;
     private PlaybackControllerHandler mPlaybackController;
     private SpeechRecognizerHandler mSpeechRecognizer;
     private SpeechSynthesizerHandler mSpeechSynthesizer;
@@ -498,27 +496,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
             throw new RuntimeException( "Could not register Notifications platform interface" );
         }
 
-        // Contacts/NavigationFavorites
-        String sampleContactsDataPath = sampleDataDir.getPath() + "/Contacts.json";;
-        String sampleNavigationFavoritesDataPath = sampleDataDir.getPath() + "/NavigationFavorites.json";
-
-        // Always use sample data from external storage if available
-        File sampleContactsFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Contacts.json");
-        File sampleNavigationFavoritesFile = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/NavigationFavorites.json");
-
-        if ( sampleContactsFile.exists() ) {
-            sampleContactsDataPath = sampleContactsFile.getPath();
-        }
-
-        if ( sampleNavigationFavoritesFile.exists() ) {
-            sampleNavigationFavoritesDataPath = sampleNavigationFavoritesFile.getPath();
-        }
-
-        if (!mEngine.registerPlatformInterface(
-                mAddressBook = new AddressBookHandler(this, mLogger, sampleContactsDataPath, sampleNavigationFavoritesDataPath )
-            )
-        ) throw new RuntimeException("Could not register AddressBook platform interface");
-
         // EqualizerController
         if ( !mEngine.registerPlatformInterface(
                 mEqualizerControllerHandler = new EqualizerControllerHandler( this, mLogger )
@@ -588,54 +565,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 mGlobalPresetHandler = new GlobalPresetHandler(this, mLogger )
         ) ) throw new RuntimeException( "Could not register Mock Global Preset platform interface" );
 
-        // Alexa Locale
-        final String supportedLocales = mEngine.getProperty(AlexaProperties.SUPPORTED_LOCALES);
-        final String[] localesArray = supportedLocales.split(",");
-
-        ArrayAdapter<String> localeAdapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, localesArray);
-
-        Spinner spinnerView = (Spinner) findViewById(R.id.locale_spinner);
-        spinnerView.setAdapter(localeAdapter);
-
-        final String defaultLocale = mEngine.getProperty(AlexaProperties.LOCALE);
-
-        int localePosition = localeAdapter.getPosition(defaultLocale);
-        if (localePosition < 0) {
-            Log.e( TAG, defaultLocale + " is not in the Supported Locales" );
-            localePosition = 0;
-        }
-        spinnerView.setSelection ( localePosition );
-
-        spinnerView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected (AdapterView<?> arg0, View arg1,
-                                        int position, long arg3) {
-                String s = localesArray[position];
-                if( !mEngine.getProperty(AlexaProperties.LOCALE).equals(s) ) {
-
-                    Toast.makeText(MainActivity.this, "Switching Alexa locale to " + s,
-                            Toast.LENGTH_SHORT).show();
-
-                    mEngine.setProperty(AlexaProperties.LOCALE, s);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-                // TODO Auto-generated method stub
-            }
-        });
-
         // Start the engine
         if ( !mEngine.start() ) throw new RuntimeException( "Could not start engine" );
         mEngineStarted = true;
-        //log whether LocationProvider gave a supported country
-        mLogger.postInfo( "Country Supported: ",  mEngine.getProperty( AlexaProperties.COUNTRY_SUPPORTED ));
 
-        // Initialize AutoVoiceChrome
-
-        mAddressBook.onInitialize();
         mAuthProvider.onInitialize();
         initTapToTalk();
     }
