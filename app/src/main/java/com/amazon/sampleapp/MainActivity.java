@@ -266,7 +266,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         mRecyclerView.setLayoutManager( new LinearLayoutManager( this ) );
         mRecyclerAdapter = new LogRecyclerViewAdapter( getApplicationContext() );
         mRecyclerView.setAdapter( mRecyclerAdapter );
-        setUpLogViewOptions();
 
         // Initialize sound effects for speech recognition
         mAudioCueStartVoice = MediaPlayer.create( this, R.raw.med_ui_wakesound );
@@ -922,81 +921,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 ( ( TextView ) findViewById( R.id.productDsn ) ).setText( productDsn );
             }
         });
-    }
-
-    // Auto Voice Chrome initialize function
-
-    // Set up log view filtering options
-    private void setUpLogViewOptions() {
-        LayoutInflater inf = getLayoutInflater();
-
-        // Add switch for each log source type
-        String[] sources = { "CLI", "AAC", "AVS" };
-        LinearLayout sourceContainer = findViewById( R.id.sourceSwitchContainer );
-        for ( final String source : sources ) {
-            View switchItem = ( inf.inflate( R.layout.drawer_switch, sourceContainer, false ) );
-            ( (TextView) switchItem.findViewById( R.id.text ) ).setText( source );
-            SwitchCompat drawerSwitch = switchItem.findViewById( R.id.drawerSwitch );
-            drawerSwitch.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
-                public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
-                    mRecyclerAdapter.setSourceDisplayMode( source, isChecked );
-                }
-            });
-            sourceContainer.addView( switchItem );
-        }
-
-        // Add option in dropdown selector for each log level
-        Spinner spinner = findViewById( R.id.levelSpinner );
-        ArrayAdapter<Logger.Level> adapter = new ArrayAdapter<>( this, android.R.layout.simple_spinner_item );
-        adapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
-
-        for ( Logger.Level level : Logger.Level.values() ) {
-            if ( level == Logger.Level.METRIC ) {
-                continue;
-            }
-            adapter.add( level );
-        }
-
-        spinner.setAdapter( adapter );
-        spinner.setOnItemSelectedListener( new AdapterView.OnItemSelectedListener() {
-            public void onItemSelected( AdapterView<?> parent, View view, int position, long id ) {
-                Logger.Level level = ( Logger.Level ) parent.getItemAtPosition(position);
-                mRecyclerAdapter.setDisplayLevel( level );
-                mRecyclerView.scrollToPosition( mRecyclerAdapter.getItemCount() - 1 );
-            }
-            public void onNothingSelected( AdapterView<?> parent ) {}
-        });
-
-        // Add switch to display or hide card logs
-        View cardItem = findViewById( R.id.toggleCards );
-        ( ( TextView ) cardItem.findViewById( R.id.text ) ).setText( R.string.log_switch_cards );
-        SwitchCompat cardSwitch = cardItem.findViewById( R.id.drawerSwitch );
-        cardSwitch.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
-                mRecyclerAdapter.setCardDisplayMode( isChecked );
-            }
-        });
-
-        // Add switch to display or hide pretty-printed JSON template logs
-        View tempItem = findViewById( R.id.toggleTemplates );
-        ( ( TextView ) tempItem.findViewById( R.id.text ) ).setText( R.string.log_switch_template );
-        SwitchCompat tempSwitch = tempItem.findViewById( R.id.drawerSwitch );
-        tempSwitch.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
-                mRecyclerAdapter.setJsonDisplayMode( isChecked );
-            }
-        });
-
-        // Clear log button
-        findViewById( R.id.clearLogButton ).setOnClickListener(
-            new View.OnClickListener() {
-                public void onClick( View v ) { mRecyclerAdapter.clear(); }
-            }
-        );
-
-        // Set initial level selection to INFO
-        spinner.setSelection( Logger.Level.INFO.ordinal() );
-        mRecyclerAdapter.setDisplayLevel( Logger.Level.INFO );
     }
 
     /**
