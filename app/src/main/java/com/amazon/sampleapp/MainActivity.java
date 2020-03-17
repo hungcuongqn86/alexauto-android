@@ -331,7 +331,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         // Create an "appdata" subdirectory in the cache directory for storing application data
         File cacheDir = getCacheDir();
         File appDataDir = new File( cacheDir, "appdata" );
-        File sampleDataDir = new File( cacheDir, "sampledata" );
 
         // Copy certs from assets to certs subdirectory of cache directory
         File certsDir = new File( appDataDir, "certs" );
@@ -342,9 +341,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         // from the APK
         File modelsDir = new File( appDataDir, "models" );
         FileUtils.copyAllAssets(getAssets(), "models", modelsDir, true);
-
-        copyAsset("Contacts.json", new File(sampleDataDir, "Contacts.json"), false);
-        copyAsset("NavigationFavorites.json", new File(sampleDataDir, "NavigationFavorites.json"), false);
 
         // Create AAC engine
         mEngine = Engine.create(this);
