@@ -26,14 +26,10 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.TextView;
 
 import com.amazon.aace.core.Engine;
 import com.amazon.aace.network.NetworkInfoProvider;
 import com.amazon.aace.network.NetworkProperties;
-import com.amazon.sampleapp.R;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,7 +43,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
     private final WifiManager mWifiManager;
     private final ConnectivityManager mConnectivityManager;
     private final NetworkChangeReceiver mReceiver;
-    private TextView mNetworkStatusText;
 
     private NetworkStatus mStatus;
 
@@ -92,7 +87,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
             if ( mConnectivityManager != null ) {
                 updateNetworkStatus();
                 int rssi = mWifiManager.getConnectionInfo().getRssi();
-                updateGUI( mStatus );
                 networkStatusChanged( mStatus, rssi );
                 notifyConnectionStatusObservers( mStatus );
             }
@@ -115,16 +109,7 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
     }
 
     private void setupGUI() {
-        mNetworkStatusText = mActivity.findViewById( R.id.networkStatus );
-    }
 
-    private void updateGUI( final NetworkInfoProvider.NetworkStatus status ) {
-        mActivity.runOnUiThread( new Runnable() {
-            @Override
-            public void run() {
-                mNetworkStatusText.setText( status != null ? status.toString() : "" );
-            }
-        } );
     }
 
     private void updateNetworkStatus() {
@@ -199,5 +184,4 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
         }
 
     }
-
 }
