@@ -10,57 +10,6 @@
         android:orientation="vertical"
         android:paddingStart="8dp"
         android:paddingEnd="8dp">
-
-        <!-- Container for login -->
-        <LinearLayout
-            android:id="@+id/login"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="4dp"
-            android:background="@color/drawerSection"
-            android:orientation="vertical"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:visibility="visible">
-
-            <!-- Login with Amazon button -->
-            <ImageButton
-                android:id="@+id/loginButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="@null"
-                android:src="@drawable/lwa_btn_src" />
-        </LinearLayout>
-
-        <!-- Container for logout -->
-        <LinearLayout
-            android:id="@+id/logout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
-            android:background="@color/drawerSection"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <!-- Log out button -->
-            <TextView
-                android:id="@+id/logoutButton"
-                style="@style/button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="@string/auth_logout" />
-        </LinearLayout>
-
         <!-- Alexa client state -->
         <LinearLayout
             android:id="@+id/clientStatus"
