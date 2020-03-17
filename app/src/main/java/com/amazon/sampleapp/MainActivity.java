@@ -58,7 +58,6 @@ import com.amazon.sampleapp.impl.AuthProvider.AuthProviderHandler;
 import com.amazon.sampleapp.impl.AuthProvider.LoginWithAmazonCBL;
 import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
 
-import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkInfoProviderHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 import com.amazon.sampleapp.impl.SpeechRecognizer.SpeechRecognizerHandler;
@@ -116,9 +115,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     // Audio
     private AudioInputProviderHandler mAudioInputProvider;
     private AudioOutputProviderHandler mAudioOutputProvider;
-
-    // Location
-    private LocationProviderHandler mLocationProvider;
 
     // Network
     private NetworkInfoProviderHandler mNetworkInfoProvider;
@@ -324,12 +320,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 mAudioOutputProvider = new AudioOutputProviderHandler(this)
         )
         ) throw new RuntimeException("Could not register AudioOutputProvider platform interface");
-
-        // LocationProvider
-        if (!mEngine.registerPlatformInterface(
-                mLocationProvider = new LocationProviderHandler(this)
-        )
-        ) throw new RuntimeException("Could not register LocationProvider platform interface");
 
         // AlexaClient
         if (!mEngine.registerPlatformInterface(
