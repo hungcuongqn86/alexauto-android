@@ -69,11 +69,9 @@ import com.amazon.sampleapp.impl.AudioPlayer.AudioPlayerHandler;
 import com.amazon.sampleapp.impl.AuthProvider.AuthProviderHandler;
 import com.amazon.sampleapp.impl.AuthProvider.LoginWithAmazonCBL;
 
-import com.amazon.sampleapp.impl.EqualizerController.EqualizerConfiguration;
 import com.amazon.sampleapp.impl.ExternalMediaPlayer.MACCPlayer;
 import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
 
-import com.amazon.sampleapp.impl.EqualizerController.EqualizerControllerHandler;
 import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
 import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.amazon.sampleapp.impl.Navigation.NavigationHandler;
@@ -82,7 +80,6 @@ import com.amazon.sampleapp.impl.PhoneCallController.PhoneCallControllerHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 import com.amazon.sampleapp.impl.SpeechRecognizer.SpeechRecognizerHandler;
 import com.amazon.sampleapp.impl.SpeechSynthesizer.SpeechSynthesizerHandler;
-import com.amazon.sampleapp.impl.TemplateRuntime.TemplateRuntimeHandler;
 import com.amazon.sampleapp.logView.LogEntry;
 import com.amazon.sampleapp.logView.LogRecyclerViewAdapter;
 
@@ -122,12 +119,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private AlexaClientHandler mAlexaClient;
     private AudioPlayerHandler mAudioPlayer;
     private AuthProviderHandler mAuthProvider;
-    private EqualizerControllerHandler mEqualizerControllerHandler;
     private PhoneCallControllerHandler mPhoneCallController;
     private PlaybackControllerHandler mPlaybackController;
     private SpeechRecognizerHandler mSpeechRecognizer;
     private SpeechSynthesizerHandler mSpeechSynthesizer;
-    private TemplateRuntimeHandler mTemplateRuntime;
     private AlexaSpeakerHandler mAlexaSpeaker;
 
     // Alexa Comms Handler
@@ -415,12 +410,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
             )
         ) throw new RuntimeException( "Could not register SpeechSynthesizer platform interface" );
 
-        // TemplateRuntime
-        if ( !mEngine.registerPlatformInterface(
-                mTemplateRuntime = new TemplateRuntimeHandler( mLogger, mPlaybackController )
-            )
-        ) throw new RuntimeException( "Could not register TemplateRuntime platform interface" );
-
         // AlexaSpeaker
         if ( !mEngine.registerPlatformInterface(
             mAlexaSpeaker = new AlexaSpeakerHandler( this,  mLogger )
@@ -502,13 +491,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                 AlexaConfiguration.createAlertsConfig(appDataDir.getPath() + "/alerts.sqlite"),
                 AlexaConfiguration.createSettingsConfig(appDataDir.getPath() + "/settings.sqlite"),
                 AlexaConfiguration.createNotificationsConfig(appDataDir.getPath() + "/notifications.sqlite"),
-                AlexaConfiguration.createEqualizerControllerConfig(
-                        EqualizerConfiguration.getSupportedBands(),
-                        EqualizerConfiguration.getMinBandLevel(),
-                        EqualizerConfiguration.getMaxBandLevel(),
-                        EqualizerConfiguration.getDefaultBandLevels() ),
                 // Uncomment the below line to specify the template runtime values
-                //AlexaConfiguration.createTemplateRuntimeTimeoutConfig( timeoutList ),
                 StorageConfiguration.createLocalStorageConfig(appDataDir.getPath() + "/localStorage.sqlite"),
 
                 // Example Vehicle Config
