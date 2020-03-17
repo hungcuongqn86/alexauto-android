@@ -78,7 +78,6 @@ import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
 import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.amazon.sampleapp.impl.Navigation.NavigationHandler;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkInfoProviderHandler;
-import com.amazon.sampleapp.impl.Notifications.NotificationsHandler;
 import com.amazon.sampleapp.impl.PhoneCallController.PhoneCallControllerHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 import com.amazon.sampleapp.impl.SpeechRecognizer.SpeechRecognizerHandler;
@@ -124,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private AudioPlayerHandler mAudioPlayer;
     private AuthProviderHandler mAuthProvider;
     private EqualizerControllerHandler mEqualizerControllerHandler;
-    private NotificationsHandler mNotifications;
     private PhoneCallControllerHandler mPhoneCallController;
     private PlaybackControllerHandler mPlaybackController;
     private SpeechRecognizerHandler mSpeechRecognizer;
@@ -461,36 +459,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
             )
         ) throw new RuntimeException( "Could not register Navigation platform interface" );
         else mEngine.setProperty( NavigationProperties.NAVIGATION_PROVIDER_NAME, "HERE" ); //set default provider name
-
-        // Notifications
-        if ( !mEngine.registerPlatformInterface(
-                mNotifications = new NotificationsHandler(
-                        this,
-                        mLogger
-                )
-            )
-        ) {
-            throw new RuntimeException( "Could not register Notifications platform interface" );
-        }
-
-        // EqualizerController
-        if ( !mEngine.registerPlatformInterface(
-                mEqualizerControllerHandler = new EqualizerControllerHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register EqualizerController platform interface" );
-
-        // AlexaComms Handler
-
-        // LVC Handlers
-
-        mMACCPlayer = new MACCPlayer(this,  mLogger, mPlaybackController);
-        if ( !mEngine.registerPlatformInterface( mMACCPlayer ) )  {
-            Log.i("MACC", "registration failed");
-            throw new RuntimeException( "Could not register external media player platform interface" );
-        } else {
-            Log.i("MACC", "registration succeeded");
-        }
-        mMACCPlayer.runDiscovery();
 
         // Mock global preset
         if ( !mEngine.registerPlatformInterface(
