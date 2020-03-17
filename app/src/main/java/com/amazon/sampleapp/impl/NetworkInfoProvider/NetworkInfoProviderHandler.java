@@ -26,11 +26,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
-import android.support.v7.widget.SwitchCompat;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.amazon.aace.core.Engine;
@@ -124,12 +121,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
 
         mInterfaceEntry = mActivity.findViewById( R.id.networkInterface);
         mInterfaceText = mActivity.findViewById( R.id.networkInterfaceText );
-
-        // Switch to toggle network interface selection
-        View interfaceToggle = mActivity.findViewById( R.id.toggleNetworkInterface );
-        ( (TextView) interfaceToggle.findViewById( R.id.text ) ).setText( R.string.select_network_interface);
-        SwitchCompat interfaceSwitch = interfaceToggle.findViewById( R.id.drawerSwitch );
-        interfaceSwitch.setChecked( false );
     }
 
     private void updateGUI( final NetworkInfoProvider.NetworkStatus status ) {
