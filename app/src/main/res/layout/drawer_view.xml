@@ -244,56 +244,6 @@
                     android:textColor="@color/drawerTextStatus"
                     android:textSize="12sp" />
             </RelativeLayout>
-
-            <!-- Switch -->
-            <include
-                android:id="@+id/toggleMockLocation"
-                layout="@layout/drawer_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|center_horizontal" />
-
-            <!-- Address entry -->
-            <LinearLayout
-                android:id="@+id/addressEntry"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:background="@color/drawerSubsection"
-                android:orientation="vertical"
-                android:paddingTop="2dp"
-                android:paddingBottom="2dp"
-                android:visibility="gone">
-
-                <EditText
-                    android:id="@+id/addressText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:inputType="text" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_marginEnd="12dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/loc_address"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/setAddressButton"
-                    style="@style/button"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:text="@string/loc_set" />
-            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

@@ -22,10 +22,7 @@ import android.location.Geocoder;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.v7.widget.SwitchCompat;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -253,48 +250,8 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
      * location
      */
     private void setupGUI() {
-        mAddressEntry = mActivity.findViewById( R.id.addressEntry );
-        mAddressText = mActivity.findViewById( R.id.addressText );
-        mAddressText.setOnFocusChangeListener( new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange( View v, boolean hasFocus ) {
-                if ( !hasFocus ) {
-                    InputMethodManager imm =
-                            ( InputMethodManager ) mActivity.getSystemService( Context.INPUT_METHOD_SERVICE );
-                    if ( imm != null ) imm.hideSoftInputFromWindow( v.getWindowToken(), 0 );
-                }
-            }
-        });
-
-        // Switch to enable mock location
-        View switchItem = mActivity.findViewById( R.id.toggleMockLocation);
-        ( (TextView) switchItem.findViewById( R.id.text ) ).setText( R.string.loc_switch_mock);
-        SwitchCompat addressSwitch = switchItem.findViewById( R.id.drawerSwitch );
-        addressSwitch.setChecked( false );
-        addressSwitch.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
-                enableMockLocation( isChecked );
-                if ( isChecked ) {
-                    mAddressEntry.setVisibility( View.VISIBLE );
-                } else {
-                    mAddressEntry.setVisibility( View.GONE );
-                }
-            }
-        });
-
         // Current location
         mLatLongText = mActivity.findViewById( R.id.latLong );
-
-        // Button to set location
-        mActivity.findViewById( R.id.setAddressButton ).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick( View v ) {
-                        setMockLocation( mAddressText.getText().toString() );
-                    }
-                }
-        );
     }
 
     /**
@@ -312,21 +269,5 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
                 }
             }
         });
-    }
-
-    /**
-     * Produces a string representation of a Location for logging
-     *
-     * @param location The location to represent as a string
-     * @return The string representation of the location
-     */
-    private String locationToString( android.location.Location location ) {
-        return String.format(
-                "provider: %s, latitude: %s, longitude: %s, altitude: %s, accuracy: %s",
-                location.getProvider(),
-                location.getLatitude(),
-                location.getLongitude(),
-                location.getAltitude(),
-                location.getAccuracy());
     }
 }
