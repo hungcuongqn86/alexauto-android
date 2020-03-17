@@ -130,54 +130,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
         ( (TextView) interfaceToggle.findViewById( R.id.text ) ).setText( R.string.select_network_interface);
         SwitchCompat interfaceSwitch = interfaceToggle.findViewById( R.id.drawerSwitch );
         interfaceSwitch.setChecked( false );
-
-
-        RadioGroup radioGroup = (RadioGroup) mActivity.findViewById(R.id.radioGroupNetworkInterface);
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if( checkedId == R.id.radioWifi ) {
-                    showAlertDialog( mActivity.getString( R.string.wlan0_message) );
-                    mInterfaceText.setText("wlan0");
-                    mInterfaceText.setEnabled(false);
-                } else if( checkedId == R.id.radioMobileData ) {
-                    showAlertDialog( mActivity.getString( R.string.rmnet0_message) );
-                    mInterfaceText.setText("rmnet0");
-                    mInterfaceText.setEnabled(false);
-                } else {
-                    // R.id.radioManualEntry
-                    mInterfaceText.setEnabled(true);
-                }
-            }
-        });
-
-        interfaceSwitch.setOnCheckedChangeListener( new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged( CompoundButton buttonView, boolean isChecked ) {
-                if ( isChecked ) {
-                    showAlertDialog("This feature best verified on devices with two or more network interfaces!");
-                    mInterfaceEntry.setVisibility( View.VISIBLE );
-                    mInterfaceText.setText( getNetworkInterface() );
-                } else {
-                    mInterfaceEntry.setVisibility( View.GONE );
-                    setNetworkInterfaceAsyncTask handler = new setNetworkInterfaceAsyncTask();
-                    handler.execute(""); // Set empty string to reset to default
-                }
-            }
-        });
-
-        // Button to set network interface.
-        mActivity.findViewById( R.id.setNetworkInterfaceButton ).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick( View v ) {
-                        setNetworkInterfaceAsyncTask handler = new setNetworkInterfaceAsyncTask();
-                        String interfaceText = mInterfaceText.getText().toString();
-                        handler.execute(interfaceText);
-                    }
-                }
-        );
     }
 
     private void updateGUI( final NetworkInfoProvider.NetworkStatus status ) {
