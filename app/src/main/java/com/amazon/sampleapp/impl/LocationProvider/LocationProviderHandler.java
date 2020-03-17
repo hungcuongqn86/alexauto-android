@@ -28,7 +28,6 @@ import android.widget.TextView;
 
 import com.amazon.aace.location.LocationProvider;
 import com.amazon.aace.location.Location;
-import com.amazon.sampleapp.R;
 
 import java.io.IOException;
 import java.util.List;
@@ -69,8 +68,6 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
 
     public LocationProviderHandler( Activity activity ) {
         mActivity = activity;
-        // Initialize GUI components
-        setupGUI();
 
         // Initialize the mock and physical location providers
         mGeocoder = new Geocoder( mActivity );
@@ -191,28 +188,9 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
             if ( location.getAccuracy() <= mCurrentLocation.getAccuracy() ||
                     System.currentTimeMillis() - mCurrentLocation.getTime() > LOCATION_UPDATE_TIMEOUT ) {
                 mCurrentLocation = location;
-                setGUILocation( mCurrentLocation );
             }
         } else {
             mCurrentLocation = location;
-            setGUILocation(mCurrentLocation);
-        }
-    }
-
-    /**
-     * Enables or disables use of mock location. When enabled, the most recently set mock location
-     * will be sent to the Engine until mock location is disabled.
-     *
-     * @param enable Whether mock location should be enabled
-     */
-    private void enableMockLocation( boolean enable ) {
-        mMockLocationEnabled = enable;
-        if ( enable ) {
-            setGUILocation( mMockLocation );
-        } else {
-            if( mCurrentLocation != null) {
-                setGUILocation( mCurrentLocation );
-            }
         }
     }
 
@@ -237,37 +215,10 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
                     mMockLocation.setAltitude( 0 );
                     mMockLocation.setAccuracy( 0 );
                     mMockLocation.setTime( System.currentTimeMillis() );
-                    setGUILocation( mMockLocation );
                 }
             } catch ( IOException e ) {
 
             }
         }
-    }
-
-    /**
-     * Initializes GUI components associated with viewing the current location and setting a mock
-     * location
-     */
-    private void setupGUI() {
-        // Current location
-        mLatLongText = mActivity.findViewById( R.id.latLong );
-    }
-
-    /**
-     * Updates the current location display to the provided location
-     */
-    private void setGUILocation( final android.location.Location location ) {
-        mActivity.runOnUiThread( new Runnable() {
-            @Override
-            public void run() {
-                if ( location != null ) {
-                    mLatLongText.setText(String.format("( %.3f, %.3f )",
-                            location.getLatitude(), location.getLongitude()));
-                } else {
-                    mLatLongText.setText( R.string.loc_unavailable );
-                }
-            }
-        });
     }
 }
