@@ -73,7 +73,6 @@ import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
 import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
 import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkInfoProviderHandler;
-import com.amazon.sampleapp.impl.PhoneCallController.PhoneCallControllerHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 import com.amazon.sampleapp.impl.SpeechRecognizer.SpeechRecognizerHandler;
 import com.amazon.sampleapp.impl.SpeechSynthesizer.SpeechSynthesizerHandler;
@@ -106,8 +105,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     private static final String sDeviceConfigFile = "app_config.json";
     private static final int sPermissionRequestCode = 0;
-    private static final String[] sRequiredPermissions = { Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE };
+    private static final String[] sRequiredPermissions = {Manifest.permission.RECORD_AUDIO,
+            Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.READ_EXTERNAL_STORAGE};
 
     /* AACE Platform Interface Handlers */
 
@@ -116,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private AlexaClientHandler mAlexaClient;
     private AudioPlayerHandler mAudioPlayer;
     private AuthProviderHandler mAuthProvider;
-    private PhoneCallControllerHandler mPhoneCallController;
     private PlaybackControllerHandler mPlaybackController;
     private SpeechRecognizerHandler mSpeechRecognizer;
     private SpeechSynthesizerHandler mSpeechSynthesizer;
@@ -173,43 +171,43 @@ public class MainActivity extends AppCompatActivity implements Observer {
     /* AutoVoiceChrome Controller */
 
     @Override
-    protected void onCreate( Bundle savedInstanceState ) {
-        super.onCreate( savedInstanceState );
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         // Check if permissions are missing and must be requested
         ArrayList<String> requests = new ArrayList<>();
 
-        for ( String permission : sRequiredPermissions) {
-            if ( ActivityCompat.checkSelfPermission( this, permission )
-                    == PackageManager.PERMISSION_DENIED ) {
-                requests.add( permission );
+        for (String permission : sRequiredPermissions) {
+            if (ActivityCompat.checkSelfPermission(this, permission)
+                    == PackageManager.PERMISSION_DENIED) {
+                requests.add(permission);
             }
         }
 
         // Request necessary permissions if not already granted, else start app
-        if ( requests.size() > 0 ) {
-            ActivityCompat.requestPermissions( this,
-                    requests.toArray( new String[requests.size()] ), sPermissionRequestCode );
+        if (requests.size() > 0) {
+            ActivityCompat.requestPermissions(this,
+                    requests.toArray(new String[requests.size()]), sPermissionRequestCode);
         } else create();
     }
 
     @Override
-    public void onRequestPermissionsResult( int requestCode, @NonNull String[] permissions,
-                                            @NonNull int[] grantResults ) {
-        if ( requestCode == sPermissionRequestCode) {
-            if ( grantResults.length > 0 ) {
-                for ( int grantResult : grantResults ) {
-                    if ( grantResult == PackageManager.PERMISSION_DENIED ) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        if (requestCode == sPermissionRequestCode) {
+            if (grantResults.length > 0) {
+                for (int grantResult : grantResults) {
+                    if (grantResult == PackageManager.PERMISSION_DENIED) {
                         // Permission request was denied
-                        Toast.makeText( this, "Permissions required",
-                                Toast.LENGTH_LONG ).show();
+                        Toast.makeText(this, "Permissions required",
+                                Toast.LENGTH_LONG).show();
                     }
                 }
                 // Permissions have been granted. Start app
                 create();
             } else {
                 // Permission request was denied
-                Toast.makeText( this, "Permissions required", Toast.LENGTH_LONG ).show();
+                Toast.makeText(this, "Permissions required", Toast.LENGTH_LONG).show();
             }
         }
     }
@@ -217,65 +215,61 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private void create() {
 
         // Set the main view content
-        setContentView( R.layout.activity_main );
+        setContentView(R.layout.activity_main);
 
         // Initialize LVCInteractionService to start LVC, if supported
         initLVC();
 
         // Add support action toolbar for action buttons
-        setSupportActionBar( ( Toolbar ) findViewById( R.id.actionToolbar ) );
+        setSupportActionBar((Toolbar) findViewById(R.id.actionToolbar));
 
         // Initialize RecyclerView list for log view
-        mRecyclerView = findViewById( R.id.rvLog );
-        mRecyclerView.setHasFixedSize( true );
-        mRecyclerView.setLayoutManager( new LinearLayoutManager( this ) );
-        mRecyclerAdapter = new LogRecyclerViewAdapter( getApplicationContext() );
-        mRecyclerView.setAdapter( mRecyclerAdapter );
+        mRecyclerView = findViewById(R.id.rvLog);
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerAdapter = new LogRecyclerViewAdapter(getApplicationContext());
+        mRecyclerView.setAdapter(mRecyclerAdapter);
 
         // Initialize sound effects for speech recognition
-        mAudioCueStartVoice = MediaPlayer.create( this, R.raw.med_ui_wakesound );
-        mAudioCueStartTouch = MediaPlayer.create( this, R.raw.med_ui_wakesound_touch );
-        mAudioCueEnd = MediaPlayer.create( this, R.raw.med_ui_endpointing_touch );
+        mAudioCueStartVoice = MediaPlayer.create(this, R.raw.med_ui_wakesound);
+        mAudioCueStartTouch = MediaPlayer.create(this, R.raw.med_ui_wakesound_touch);
+        mAudioCueEnd = MediaPlayer.create(this, R.raw.med_ui_endpointing_touch);
 
         // Get shared preferences
-        mPreferences = getSharedPreferences( getString( R.string.preference_file_key ),
-                Context.MODE_PRIVATE );
+        mPreferences = getSharedPreferences(getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE);
 
         // Retrieve device config from config file and update preferences
         String clientId = "", productId = "", productDsn = "";
         JSONObject config = FileUtils.getConfigFromFile(getAssets(), sDeviceConfigFile, "config");
-        if ( config != null ) {
+        if (config != null) {
             try {
-                clientId = config.getString( "clientId" );
-                productId = config.getString( "productId" );
-            } catch ( JSONException e ) {
-                Log.w( TAG, "Missing device info in app_config.json" );
+                clientId = config.getString("clientId");
+                productId = config.getString("productId");
+            } catch (JSONException e) {
+                Log.w(TAG, "Missing device info in app_config.json");
             }
             try {
-                productDsn = config.getString( "productDsn" );
-            } catch ( JSONException e ) {
+                productDsn = config.getString("productDsn");
+            } catch (JSONException e) {
                 try {
                     // set Android ID as product DSN
-                    productDsn = Settings.Secure.getString( getContentResolver(),
-                            Settings.Secure.ANDROID_ID );
-                    Log.i( TAG, "android id for DSN: " + productDsn );
-                } catch ( Error error ) {
+                    productDsn = Settings.Secure.getString(getContentResolver(),
+                            Settings.Secure.ANDROID_ID);
+                    Log.i(TAG, "android id for DSN: " + productDsn);
+                } catch (Error error) {
                     productDsn = UUID.randomUUID().toString();
-                    Log.w( TAG, "android id not found, generating random DSN: " + productDsn );
+                    Log.w(TAG, "android id not found, generating random DSN: " + productDsn);
                 }
             }
         }
-        updateDevicePreferences( clientId, productId, productDsn );
-
-        // Display device config settings in GUI
-        updateDeviceConfigGUI( clientId, productId, productDsn );
-
+        updateDevicePreferences(clientId, productId, productDsn);
     }
 
     /**
-      * Start {@link LVCInteractionService}, the service that initializes and communicates with LVC,
-      * and register a broadcast receiver to receive the configuration from LVC provided through the
-      * {@link LVCInteractionService}
+     * Start {@link LVCInteractionService}, the service that initializes and communicates with LVC,
+     * and register a broadcast receiver to receive the configuration from LVC provided through the
+     * {@link LVCInteractionService}
      */
     private void initLVC() {
         // Register broadcast receiver for configuration from the LVCInteractionService
@@ -290,7 +284,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     /**
      * Continue starting the Engine with the config received from LVC Service.
-     * @param config  json string with LVC config if LVC is supported, null otherwise
+     *
+     * @param config json string with LVC config if LVC is supported, null otherwise
      */
     private void onLVCConfigReceived(String config) {
         // Initialize AAC engine and register platform interfaces
@@ -298,150 +293,145 @@ public class MainActivity extends AppCompatActivity implements Observer {
             if (!mEngineStarted) {
                 startEngine(config);
             }
-        } catch ( RuntimeException e ) {
-            Log.e( TAG, "Could not start engine. Reason: " + e.getMessage() );
+        } catch (RuntimeException e) {
+            Log.e(TAG, "Could not start engine. Reason: " + e.getMessage());
             return;
         }
 
         // Observe log event changes to update the log view
-        mLogger.addLogObserver( this );
-        mSpeechRecognizer.addObserver( this );
+        mLogger.addLogObserver(this);
+        mSpeechRecognizer.addObserver(this);
     }
 
     /**
      * Configure the Engine and register platform interface instances
+     *
      * @param json JSON string with LVC config if LVC is supported, null otherwise.
      */
     private void startEngine(String json) throws RuntimeException {
 
         // Create an "appdata" subdirectory in the cache directory for storing application data
         File cacheDir = getCacheDir();
-        File appDataDir = new File( cacheDir, "appdata" );
+        File appDataDir = new File(cacheDir, "appdata");
 
         // Copy certs from assets to certs subdirectory of cache directory
-        File certsDir = new File( appDataDir, "certs" );
+        File certsDir = new File(appDataDir, "certs");
         FileUtils.copyAllAssets(getAssets(), "certs", certsDir, false);
 
         // Copy models from assets to certs subdirectory of cache directory.
         // Force copy the models on every start so that the models on device cache are always the latest
         // from the APK
-        File modelsDir = new File( appDataDir, "models" );
+        File modelsDir = new File(appDataDir, "models");
         FileUtils.copyAllAssets(getAssets(), "models", modelsDir, true);
 
         // Create AAC engine
         mEngine = Engine.create(this);
-        ArrayList<EngineConfiguration> configuration = getEngineConfigurations( json, appDataDir, certsDir, modelsDir );
+        ArrayList<EngineConfiguration> configuration = getEngineConfigurations(json, appDataDir, certsDir, modelsDir);
 
-        EngineConfiguration[] configurationArray = configuration.toArray( new EngineConfiguration[configuration.size()] );
-        boolean configureSucceeded = mEngine.configure( configurationArray );
-        if ( !configureSucceeded ) throw new RuntimeException( "Engine configuration failed" );
+        EngineConfiguration[] configurationArray = configuration.toArray(new EngineConfiguration[configuration.size()]);
+        boolean configureSucceeded = mEngine.configure(configurationArray);
+        if (!configureSucceeded) throw new RuntimeException("Engine configuration failed");
 
         // Create the platform implementation handlers and register them with the engine
         // Logger
-        if ( !mEngine.registerPlatformInterface(
+        if (!mEngine.registerPlatformInterface(
                 mLogger = new LoggerHandler()
-            )
-        ) throw new RuntimeException( "Could not register Logger platform interface" );
+        )
+        ) throw new RuntimeException("Could not register Logger platform interface");
 
         // AudioInputProvider
-        if ( !mEngine.registerPlatformInterface(
-                mAudioInputProvider = new AudioInputProviderHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register AudioInputProvider platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mAudioInputProvider = new AudioInputProviderHandler(this, mLogger)
+        )
+        ) throw new RuntimeException("Could not register AudioInputProvider platform interface");
 
         // AudioInputProvider
-        if ( !mEngine.registerPlatformInterface(
-                mAudioOutputProvider = new AudioOutputProviderHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register AudioOutputProvider platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mAudioOutputProvider = new AudioOutputProviderHandler(this, mLogger)
+        )
+        ) throw new RuntimeException("Could not register AudioOutputProvider platform interface");
 
         // LocationProvider
-        if ( !mEngine.registerPlatformInterface(
-                mLocationProvider = new LocationProviderHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register LocationProvider platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mLocationProvider = new LocationProviderHandler(this, mLogger)
+        )
+        ) throw new RuntimeException("Could not register LocationProvider platform interface");
 
         // AlexaClient
-        if ( !mEngine.registerPlatformInterface(
-                mAlexaClient = new AlexaClientHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register AlexaClient platform interface" );
-
-        // PhoneCallController
-        if ( !mEngine.registerPlatformInterface(
-                mPhoneCallController = new PhoneCallControllerHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register PhoneCallController platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mAlexaClient = new AlexaClientHandler(this, mLogger)
+        )
+        ) throw new RuntimeException("Could not register AlexaClient platform interface");
 
         // PlaybackController
-        if ( !mEngine.registerPlatformInterface(
-                mPlaybackController = new PlaybackControllerHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register PlaybackController platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mPlaybackController = new PlaybackControllerHandler(this, mLogger)
+        )
+        ) throw new RuntimeException("Could not register PlaybackController platform interface");
 
         // SpeechRecognizer
         boolean wakeWordSupported = false;
-        if ( !mEngine.registerPlatformInterface(
+        if (!mEngine.registerPlatformInterface(
                 mSpeechRecognizer = new SpeechRecognizerHandler(
                         this,
                         mLogger,
                         wakeWordSupported,
                         true
                 )
-            )
-        ) throw new RuntimeException( "Could not register SpeechRecognizer platform interface" );
+        )
+        ) throw new RuntimeException("Could not register SpeechRecognizer platform interface");
 
         // AudioPlayer
-        if ( !mEngine.registerPlatformInterface(
-                mAudioPlayer = new AudioPlayerHandler( mLogger, mAudioOutputProvider, mPlaybackController )
-            )
-        ) throw new RuntimeException( "Could not register AudioPlayer platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mAudioPlayer = new AudioPlayerHandler(mLogger, mAudioOutputProvider, mPlaybackController)
+        )
+        ) throw new RuntimeException("Could not register AudioPlayer platform interface");
 
         // SpeechSynthesizer
-        if ( !mEngine.registerPlatformInterface(
+        if (!mEngine.registerPlatformInterface(
                 mSpeechSynthesizer = new SpeechSynthesizerHandler()
-            )
-        ) throw new RuntimeException( "Could not register SpeechSynthesizer platform interface" );
+        )
+        ) throw new RuntimeException("Could not register SpeechSynthesizer platform interface");
 
         // AlexaSpeaker
-        if ( !mEngine.registerPlatformInterface(
-            mAlexaSpeaker = new AlexaSpeakerHandler( this,  mLogger )
+        if (!mEngine.registerPlatformInterface(
+                mAlexaSpeaker = new AlexaSpeakerHandler(this, mLogger)
         )
-        ) throw new RuntimeException( "Could not register AlexaSpeaker platform interface" );
+        ) throw new RuntimeException("Could not register AlexaSpeaker platform interface");
 
         // Alerts
-        if ( !mEngine.registerPlatformInterface(
+        if (!mEngine.registerPlatformInterface(
                 mAlerts = new AlertsHandler(
                         this,
-                        mLogger )
-            )
-        ) throw new RuntimeException( "Could not register Alerts platform interface" );
+                        mLogger)
+        )
+        ) throw new RuntimeException("Could not register Alerts platform interface");
 
         // NetworkInfoProvider
-        if ( !mEngine.registerPlatformInterface(
-                mNetworkInfoProvider = new NetworkInfoProviderHandler( this, mLogger, mEngine )
-            )
-        ) throw new RuntimeException( "Could not register NetworkInfoProvider platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mNetworkInfoProvider = new NetworkInfoProviderHandler(this, mLogger, mEngine)
+        )
+        ) throw new RuntimeException("Could not register NetworkInfoProvider platform interface");
 
         // CBL Auth Handler
-        LoginWithAmazonCBL LoginHandler = new LoginWithAmazonCBL( this, mLogger );
+        LoginWithAmazonCBL LoginHandler = new LoginWithAmazonCBL(this, mLogger);
 
         // AuthProvider
-        if ( !mEngine.registerPlatformInterface(
-                mAuthProvider = new AuthProviderHandler( this, mLogger, LoginHandler)
-            )
-        ) throw new RuntimeException( "Could not register AuthProvider platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mAuthProvider = new AuthProviderHandler(this, mLogger, LoginHandler)
+        )
+        ) throw new RuntimeException("Could not register AuthProvider platform interface");
 
         // Set auth handler as connection observer
-        mNetworkInfoProvider.registerNetworkConnectionObserver( LoginHandler );
+        mNetworkInfoProvider.registerNetworkConnectionObserver(LoginHandler);
 
         // Mock global preset
-        if ( !mEngine.registerPlatformInterface(
-                mGlobalPresetHandler = new GlobalPresetHandler(this, mLogger )
-        ) ) throw new RuntimeException( "Could not register Mock Global Preset platform interface" );
+        if (!mEngine.registerPlatformInterface(
+                mGlobalPresetHandler = new GlobalPresetHandler(this, mLogger)
+        )) throw new RuntimeException("Could not register Mock Global Preset platform interface");
 
         // Start the engine
-        if ( !mEngine.start() ) throw new RuntimeException( "Could not start engine" );
+        if (!mEngine.start()) throw new RuntimeException("Could not start engine");
         mEngineStarted = true;
 
         mAuthProvider.onInitialize();
@@ -450,21 +440,22 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     /**
      * Get the configurations to start the Engine
-     * @param json JSON string with LVC config if LVC is supported, null otherwise.
+     *
+     * @param json       JSON string with LVC config if LVC is supported, null otherwise.
      * @param appDataDir path to app's data directory
-     * @param certsDir path to certificates directory
+     * @param certsDir   path to certificates directory
      * @return List of Engine configurations
      */
     private ArrayList<EngineConfiguration> getEngineConfigurations(String json, File appDataDir, File certsDir, File modelsDir) {
         // Configure the engine
-        String productDsn = mPreferences.getString( getString( R.string.preference_product_dsn ), "" );
-        String clientId = mPreferences.getString( getString( R.string.preference_client_id ), "" );
-        String productId = mPreferences.getString( getString( R.string.preference_product_id ), "" );
+        String productDsn = mPreferences.getString(getString(R.string.preference_product_dsn), "");
+        String clientId = mPreferences.getString(getString(R.string.preference_client_id), "");
+        String productId = mPreferences.getString(getString(R.string.preference_product_id), "");
 
-        AlexaConfiguration.TemplateRuntimeTimeout [] timeoutList = new AlexaConfiguration.TemplateRuntimeTimeout[ ]{
-                new AlexaConfiguration.TemplateRuntimeTimeout ( AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_TTS_FINISHED_TIMEOUT, 8000 ),
-                new AlexaConfiguration.TemplateRuntimeTimeout ( AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_AUDIO_PLAYBACK_FINISHED_TIMEOUT, 8000),
-                new AlexaConfiguration.TemplateRuntimeTimeout ( AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_AUDIO_PLAYBACK_STOPPED_PAUSED_TIMEOUT, 1800000)
+        AlexaConfiguration.TemplateRuntimeTimeout[] timeoutList = new AlexaConfiguration.TemplateRuntimeTimeout[]{
+                new AlexaConfiguration.TemplateRuntimeTimeout(AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_TTS_FINISHED_TIMEOUT, 8000),
+                new AlexaConfiguration.TemplateRuntimeTimeout(AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_AUDIO_PLAYBACK_FINISHED_TIMEOUT, 8000),
+                new AlexaConfiguration.TemplateRuntimeTimeout(AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_AUDIO_PLAYBACK_STOPPED_PAUSED_TIMEOUT, 1800000)
         };
 
         JSONObject config = null;
@@ -500,8 +491,8 @@ public class MainActivity extends AppCompatActivity implements Observer {
         ));
 
         String endpointConfigPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/aace.json";
-        if ( new File( endpointConfigPath ).exists() ) {
-            EngineConfiguration alexaEndpointsConfig = ConfigurationFile.create( Environment.getExternalStorageDirectory().getAbsolutePath() + "/aace.json" );
+        if (new File(endpointConfigPath).exists()) {
+            EngineConfiguration alexaEndpointsConfig = ConfigurationFile.create(Environment.getExternalStorageDirectory().getAbsolutePath() + "/aace.json");
             configuration.add(alexaEndpointsConfig);
             Log.i("getEngineConfigurations", "Overriding endpoints");
         }
@@ -519,29 +510,33 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void onDestroy() {
-        if ( mLogger != null ) mLogger.postInfo( TAG, "Engine stopped" );
-        else Log.i( TAG, "Engine stopped" );
+        if (mLogger != null) mLogger.postInfo(TAG, "Engine stopped");
+        else Log.i(TAG, "Engine stopped");
 
-        if ( mAudioCueStartVoice != null ) {
+        if (mAudioCueStartVoice != null) {
             mAudioCueStartVoice.release();
             mAudioCueStartVoice = null;
         }
-        if ( mAudioCueStartTouch != null ) {
+        if (mAudioCueStartTouch != null) {
             mAudioCueStartTouch.release();
             mAudioCueStartTouch = null;
         }
-        if ( mAudioCueEnd != null ) {
+        if (mAudioCueEnd != null) {
             mAudioCueEnd.release();
             mAudioCueEnd = null;
         }
 
-        if ( mLVCConfigReceiver != null ) {
+        if (mLVCConfigReceiver != null) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(mLVCConfigReceiver);
         }
 
-        if ( mNetworkInfoProvider != null ) { mNetworkInfoProvider.unregister(); }
+        if (mNetworkInfoProvider != null) {
+            mNetworkInfoProvider.unregister();
+        }
 
-        if ( mEngine != null ) { mEngine.dispose(); }
+        if (mEngine != null) {
+            mEngine.dispose();
+        }
 
         // AutoVoiceChrome cleanup
 
@@ -549,65 +544,68 @@ public class MainActivity extends AppCompatActivity implements Observer {
     }
 
     @Override
-    public boolean onCreateOptionsMenu( Menu menu ) {
-        super.onCreateOptionsMenu( menu );
-        getMenuInflater().inflate( R.menu.menu_main, menu );
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        final View drawer = findViewById(R.id.drawer);
+        drawer.setVisibility(View.VISIBLE);
 
         // Set tap-to-talk and hold-to-talk actions
-        mTapToTalkIcon = menu.findItem( R.id.action_talk );
+        mTapToTalkIcon = menu.findItem(R.id.action_talk);
         initTapToTalk();
         return true;
     }
 
     private void initTapToTalk() {
-        if ( mTapToTalkIcon != null && mAlexaClient != null && mSpeechRecognizer != null ) {
-            mTapToTalkIcon.setActionView( R.layout.menu_item_talk );
+        if (mTapToTalkIcon != null && mAlexaClient != null && mSpeechRecognizer != null) {
+            mTapToTalkIcon.setActionView(R.layout.menu_item_talk);
 
             // Set hold-to-talk action
-            mTapToTalkIcon.getActionView().setOnClickListener( new View.OnClickListener() {
+            mTapToTalkIcon.getActionView().setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick( View v ) {
-                    if ( mAlexaClient.getConnectionStatus()
-                            == AlexaClient.ConnectionStatus.CONNECTED ) {
+                public void onClick(View v) {
+                    if (mAlexaClient.getConnectionStatus()
+                            == AlexaClient.ConnectionStatus.CONNECTED) {
                         mSpeechRecognizer.onTapToTalk();
                     } else {
                         // Notify Error state to AutoVoiceChrome
 
                         String message = "AlexaClient not connected. ConnectionStatus: "
                                 + mAlexaClient.getConnectionStatus();
-                        if ( mLogger != null )  mLogger.postWarn( TAG, message );
-                        else Log.w( TAG, message );
+                        if (mLogger != null) mLogger.postWarn(TAG, message);
+                        else Log.w(TAG, message);
                     }
                 }
             });
 
             // Start hold-to-talk button action
-            mTapToTalkIcon.getActionView().setOnLongClickListener( new View.OnLongClickListener() {
+            mTapToTalkIcon.getActionView().setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
-                public boolean onLongClick( View v ) {
-                    if ( mAlexaClient.getConnectionStatus()
-                            == AlexaClient.ConnectionStatus.CONNECTED ) {
+                public boolean onLongClick(View v) {
+                    if (mAlexaClient.getConnectionStatus()
+                            == AlexaClient.ConnectionStatus.CONNECTED) {
                         mIsTalkButtonLongPressed = true;
                         mSpeechRecognizer.onHoldToTalk();
                     } else {
                         // Notify Error state to AutoVoiceChrome
 
-                        if ( mLogger != null ) {
-                            mLogger.postWarn( TAG,
-                                    "ConnectionStatus: DISCONNECTED" );
-                        } else Log.w( TAG, "ConnectionStatus: DISCONNECTED" );
+                        if (mLogger != null) {
+                            mLogger.postWarn(TAG,
+                                    "ConnectionStatus: DISCONNECTED");
+                        } else Log.w(TAG, "ConnectionStatus: DISCONNECTED");
                     }
                     return true;
                 }
             });
 
             // Release hold-to-talk button action
-            mTapToTalkIcon.getActionView().setOnTouchListener( new View.OnTouchListener() {
+            mTapToTalkIcon.getActionView().setOnTouchListener(new View.OnTouchListener() {
                 @Override
-                public boolean onTouch( View v, MotionEvent m ) {
+                public boolean onTouch(View v, MotionEvent m) {
                     // Talk button released
-                    if ( m.getAction() == MotionEvent.ACTION_UP ) {
-                        if ( mIsTalkButtonLongPressed ) {
+                    if (m.getAction() == MotionEvent.ACTION_UP) {
+                        if (mIsTalkButtonLongPressed) {
                             mIsTalkButtonLongPressed = false;
                             mSpeechRecognizer.onReleaseHoldToTalk();
                         }
@@ -618,78 +616,26 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    private void toggleEndOfRequestState( boolean isChecked ) {
-        synchronized ( mDisableEndOfRequestEarconLock ) {
-            if ( isChecked )
-                mDisableEndOfRequestEarcon = false;
-            else
-                mDisableEndOfRequestEarcon = true;
-        }
-    }
-
-    private void toggleStartOfRequestState( boolean isChecked ) {
-        synchronized ( mDisableStartOfRequestEarconLock ) {
-            if ( isChecked )
-                mDisableStartOfRequestEarcon = false;
-            else
-                mDisableStartOfRequestEarcon = true;
-        }
-    }
-
     @Override
-    public boolean onOptionsItemSelected( MenuItem item ) {
-        switch ( item.getItemId() ) {
-            case R.id.action_drawer:
-                toggleDrawer();
-                return true;
-            default:
-                return super.onOptionsItemSelected( item );
-        }
-    }
-
-    public void toggleDrawer() {
-        final View drawer = findViewById( R.id.drawer );
-        if ( drawer.getVisibility() == View.VISIBLE ) {
-            drawer.setVisibility( View.GONE );
-        } else {
-            drawer.setVisibility( View.VISIBLE );
-        }
-    }
-
-    @Override
-    public void update( Observable observable, Object object ) {
-        if ( observable instanceof LoggerHandler.LoggerObservable ) {
-            if ( object instanceof LogEntry ) {
-                final LogEntry entry = ( LogEntry ) object;
-                runOnUiThread( new Runnable() {
-                    public void run() {
-                        // Insert log entry into log view
-                        mRecyclerAdapter.insertItem( entry );
-                        // Scroll to bottom of log view
-                        int count = mRecyclerAdapter.getItemCount();
-                        int position = count > 0 ? count - 1 : 0;
-                        mRecyclerView.scrollToPosition( position );
-                    }
-                } );
-            }
-        } else if ( observable instanceof SpeechRecognizerHandler.AudioCueObservable ) {
-            if ( object.equals( SpeechRecognizerHandler.AudioCueState.START_TOUCH ) ) {
-                synchronized ( mDisableStartOfRequestEarconLock ) {
-                    if( !mDisableStartOfRequestEarcon ) {
+    public void update(Observable observable, Object object) {
+        if (observable instanceof SpeechRecognizerHandler.AudioCueObservable) {
+            if (object.equals(SpeechRecognizerHandler.AudioCueState.START_TOUCH)) {
+                synchronized (mDisableStartOfRequestEarconLock) {
+                    if (!mDisableStartOfRequestEarcon) {
                         // Play touch-initiated listening audio cue
                         mAudioCueStartTouch.start();
                     }
                 }
-            } else if ( object.equals( SpeechRecognizerHandler.AudioCueState.START_VOICE ) ) {
-                synchronized ( mDisableStartOfRequestEarconLock ) {
-                    if ( !mDisableStartOfRequestEarcon ) {
+            } else if (object.equals(SpeechRecognizerHandler.AudioCueState.START_VOICE)) {
+                synchronized (mDisableStartOfRequestEarconLock) {
+                    if (!mDisableStartOfRequestEarcon) {
                         // Play voice-initiated listening audio cue
                         mAudioCueStartVoice.start();
                     }
                 }
-            } else if ( object.equals( SpeechRecognizerHandler.AudioCueState.END ) ) {
-                synchronized ( mDisableEndOfRequestEarconLock ) {
-                    if ( !mDisableEndOfRequestEarcon ) {
+            } else if (object.equals(SpeechRecognizerHandler.AudioCueState.END)) {
+                synchronized (mDisableEndOfRequestEarconLock) {
+                    if (!mDisableEndOfRequestEarcon) {
                         // Play stop listening audio cue
                         mAudioCueEnd.start();
                     }
@@ -698,31 +644,14 @@ public class MainActivity extends AppCompatActivity implements Observer {
         }
     }
 
-    private void copyAsset(String assetPath, File destFile, boolean force) {
-        FileUtils.copyAsset(getAssets(), assetPath, destFile, force);
-    }
-
-    private void updateDevicePreferences( String clientId,
-                                          String productId,
-                                          String productDsn ) {
+    private void updateDevicePreferences(String clientId,
+                                         String productId,
+                                         String productDsn) {
         SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString( getString( R.string.preference_client_id ), clientId );
-        editor.putString( getString( R.string.preference_product_id ), productId );
-        editor.putString( getString( R.string.preference_product_dsn ), productDsn );
+        editor.putString(getString(R.string.preference_client_id), clientId);
+        editor.putString(getString(R.string.preference_product_id), productId);
+        editor.putString(getString(R.string.preference_product_dsn), productDsn);
         editor.apply();
-    }
-
-    private void updateDeviceConfigGUI( final String clientId,
-                                        final String productId,
-                                        final String productDsn ) {
-        runOnUiThread( new Runnable() {
-            @Override
-            public void run() {
-                ( ( TextView ) findViewById( R.id.clientId ) ).setText( clientId );
-                ( ( TextView ) findViewById( R.id.productId ) ).setText( productId );
-                ( ( TextView ) findViewById( R.id.productDsn ) ).setText( productDsn );
-            }
-        });
     }
 
     /**
@@ -737,10 +666,10 @@ public class MainActivity extends AppCompatActivity implements Observer {
                     // LVCInteractionService was unable to provide config from LVC
                     String reason = intent.getStringExtra(LVCInteractionService.LVC_RECEIVER_FAILURE_REASON);
                     onLVCConfigReceived(null);
-                    Log.e( TAG, "Failed to init LVC: " + reason );
+                    Log.e(TAG, "Failed to init LVC: " + reason);
                 } else if (intent.hasExtra(LVCInteractionService.LVC_RECEIVER_CONFIGURATION)) {
                     // LVCInteractionService received config from LVC
-                    Log.i( TAG, "Received config from LVC, starting engine now" );
+                    Log.i(TAG, "Received config from LVC, starting engine now");
                     String config = intent.getStringExtra(LVCInteractionService.LVC_RECEIVER_CONFIGURATION);
                     onLVCConfigReceived(config);
                 }
