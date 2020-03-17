@@ -74,7 +74,6 @@ import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
 
 import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
 import com.amazon.sampleapp.impl.Logger.LoggerHandler;
-import com.amazon.sampleapp.impl.Navigation.NavigationHandler;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkInfoProviderHandler;
 import com.amazon.sampleapp.impl.PhoneCallController.PhoneCallControllerHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
@@ -142,9 +141,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     // Logger
     private LoggerHandler mLogger;
-
-    // Navigation
-    private NavigationHandler mNavigation;
 
     // Network
     private NetworkInfoProviderHandler mNetworkInfoProvider;
@@ -441,13 +437,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         // Set auth handler as connection observer
         mNetworkInfoProvider.registerNetworkConnectionObserver( LoginHandler );
-
-        // Navigation
-        if ( !mEngine.registerPlatformInterface(
-                mNavigation = new NavigationHandler( this, mLogger )
-            )
-        ) throw new RuntimeException( "Could not register Navigation platform interface" );
-        else mEngine.setProperty( NavigationProperties.NAVIGATION_PROVIDER_NAME, "HERE" ); //set default provider name
 
         // Mock global preset
         if ( !mEngine.registerPlatformInterface(
