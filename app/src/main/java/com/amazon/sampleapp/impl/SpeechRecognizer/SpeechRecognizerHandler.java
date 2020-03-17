@@ -16,14 +16,8 @@
 package com.amazon.sampleapp.impl.SpeechRecognizer;
 
 import android.app.Activity;
-import android.support.v7.widget.SwitchCompat;
-import android.view.View;
-import android.widget.CompoundButton;
-import android.widget.TextView;
 
 import com.amazon.aace.alexa.SpeechRecognizer;
-import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 import java.util.Observable;
 import java.util.Observer;
@@ -36,7 +30,6 @@ public class SpeechRecognizerHandler extends SpeechRecognizer {
     private static final String TAG = SpeechRecognizerHandler.class.getSimpleName();
 
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
     private AudioCueObservable mAudioCueObservable = new AudioCueObservable();
     private final ExecutorService mExecutor = Executors.newFixedThreadPool( 1 );
     private boolean mWakeWordEnabled;
@@ -44,12 +37,10 @@ public class SpeechRecognizerHandler extends SpeechRecognizer {
     // AutoVoiceChrome controller
 
     public SpeechRecognizerHandler( Activity activity,
-                                    LoggerHandler logger,
                                     boolean wakeWordSupported,
                                     boolean wakeWordEnabled ) {
         super( wakeWordSupported && wakeWordEnabled );
         mActivity = activity;
-        mLogger = logger;
         mWakeWordEnabled = wakeWordEnabled;
     }
 

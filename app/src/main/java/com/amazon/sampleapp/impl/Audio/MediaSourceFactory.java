@@ -20,7 +20,6 @@ import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
@@ -45,7 +44,6 @@ class MediaSourceFactory {
     private static final String sTag = "MediaSourceFactory";
     private static final String sUserAgentName = "com.amazon.sampleapp";
 
-    private final LoggerHandler mLogger;
     private final Context mContext;
     private final String mName;
     private final Handler mMainHandler = new Handler();
@@ -54,9 +52,8 @@ class MediaSourceFactory {
     private final DataSource.Factory mFileDataSourceFactory = new FileDataSourceFactory( null );
     private final DataSource.Factory mHttpDataSourceFactory;
 
-    MediaSourceFactory( Context context, LoggerHandler logger, String name ) {
+    MediaSourceFactory( Context context, String name ) {
         mContext = context;
-        mLogger = logger;
         mName = name;
         mHttpDataSourceFactory = buildHttpDataSourceFactory( mContext );
     }
@@ -163,7 +160,6 @@ class MediaSourceFactory {
                                    Object trackSelectionData, long mediaStartTimeMs,
                                    long mediaEndTimeMs, long elapsedRealtimeMs ) {
             mRetryCount = 1;
-            mLogger.postVerbose( sTag, String.format( "(%s) Load media started", mName ) );
         }
 
         @Override
@@ -181,7 +177,6 @@ class MediaSourceFactory {
                                     Object trackSelectionData, long mediaStartTimeMs,
                                     long mediaEndTimeMs, long elapsedRealtimeMs, long loadDurationMs,
                                     long bytesLoaded ) {
-            mLogger.postVerbose( sTag, String.format( "(%s) Load media cancelled", mName ) );
             mRetryCount = 0;
         }
 
@@ -191,8 +186,6 @@ class MediaSourceFactory {
                                  long mediaStartTimeMs, long mediaEndTimeMs, long elapsedRealtimeMs,
                                  long loadDurationMs, long bytesLoaded, IOException error,
                                  boolean wasCanceled ) {
-            mLogger.postVerbose( sTag,
-                    String.format( "(%s) Error loading media. Attempts: %s", mName, mRetryCount ) );
             mRetryCount++;
         }
 

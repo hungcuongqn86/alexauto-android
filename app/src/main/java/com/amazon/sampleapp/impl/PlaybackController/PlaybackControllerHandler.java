@@ -24,8 +24,6 @@ import android.widget.ToggleButton;
 
 import com.amazon.aace.alexa.PlaybackController;
 import com.amazon.aace.audio.AudioOutput;
-import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 import java.util.Formatter;
 import java.util.Locale;
@@ -35,7 +33,6 @@ public class PlaybackControllerHandler extends PlaybackController {
     private static final String sTag = PlaybackControllerHandler.class.getSimpleName();
 
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
     private final StringBuilder mStringBuilder;
     private final Formatter mFormatter;
     private ImageButton mControlPrev, mControlNext, mControlSkipForward, mControlSkipBackward;
@@ -45,9 +42,8 @@ public class PlaybackControllerHandler extends PlaybackController {
     private String mCurrentProvider = "";
     private long mCurrentDuration = AudioOutput.TIME_UNKNOWN;
 
-    public PlaybackControllerHandler( Activity activity, LoggerHandler logger ) {
+    public PlaybackControllerHandler( Activity activity) {
         mActivity = activity;
-        mLogger = logger;
         mStringBuilder = new StringBuilder();
         mFormatter = new Formatter( mStringBuilder, Locale.US );
     }

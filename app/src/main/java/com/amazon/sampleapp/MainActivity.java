@@ -32,34 +32,22 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SwitchCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazon.aace.alexa.AlexaClient;
-import com.amazon.aace.alexa.AlexaProperties;
 import com.amazon.aace.alexa.config.AlexaConfiguration;
 import com.amazon.aace.core.CoreProperties;
 import com.amazon.aace.core.Engine;
 import com.amazon.aace.core.config.ConfigurationFile;
 import com.amazon.aace.core.config.EngineConfiguration;
-import com.amazon.aace.logger.Logger;
-import com.amazon.aace.navigation.NavigationProperties;
 import com.amazon.aace.storage.config.StorageConfiguration;
 import com.amazon.aace.vehicle.config.VehicleConfiguration;
-import com.amazon.aace.navigation.Navigation;
 import com.amazon.sampleapp.impl.Alerts.AlertsHandler;
 import com.amazon.sampleapp.impl.AlexaClient.AlexaClientHandler;
 import com.amazon.sampleapp.impl.AlexaSpeaker.AlexaSpeakerHandler;
@@ -71,19 +59,16 @@ import com.amazon.sampleapp.impl.AuthProvider.LoginWithAmazonCBL;
 import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
 
 import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkInfoProviderHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 import com.amazon.sampleapp.impl.SpeechRecognizer.SpeechRecognizerHandler;
 import com.amazon.sampleapp.impl.SpeechSynthesizer.SpeechSynthesizerHandler;
-import com.amazon.sampleapp.logView.LogEntry;
 import com.amazon.sampleapp.logView.LogRecyclerViewAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Observable;
@@ -134,9 +119,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     // Location
     private LocationProviderHandler mLocationProvider;
-
-    // Logger
-    private LoggerHandler mLogger;
 
     // Network
     private NetworkInfoProviderHandler mNetworkInfoProvider;
@@ -297,9 +279,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
             Log.e(TAG, "Could not start engine. Reason: " + e.getMessage());
             return;
         }
-
-        // Observe log event changes to update the log view
-        mLogger.addLogObserver(this);
         mSpeechRecognizer.addObserver(this);
     }
 
@@ -333,57 +312,47 @@ public class MainActivity extends AppCompatActivity implements Observer {
         if (!configureSucceeded) throw new RuntimeException("Engine configuration failed");
 
         // Create the platform implementation handlers and register them with the engine
-        // Logger
-        if (!mEngine.registerPlatformInterface(
-                mLogger = new LoggerHandler()
-        )
-        ) throw new RuntimeException("Could not register Logger platform interface");
 
         // AudioInputProvider
         if (!mEngine.registerPlatformInterface(
-                mAudioInputProvider = new AudioInputProviderHandler(this, mLogger)
+                mAudioInputProvider = new AudioInputProviderHandler(this)
         )
         ) throw new RuntimeException("Could not register AudioInputProvider platform interface");
 
         // AudioInputProvider
         if (!mEngine.registerPlatformInterface(
-                mAudioOutputProvider = new AudioOutputProviderHandler(this, mLogger)
+                mAudioOutputProvider = new AudioOutputProviderHandler(this)
         )
         ) throw new RuntimeException("Could not register AudioOutputProvider platform interface");
 
         // LocationProvider
         if (!mEngine.registerPlatformInterface(
-                mLocationProvider = new LocationProviderHandler(this, mLogger)
+                mLocationProvider = new LocationProviderHandler(this)
         )
         ) throw new RuntimeException("Could not register LocationProvider platform interface");
 
         // AlexaClient
         if (!mEngine.registerPlatformInterface(
-                mAlexaClient = new AlexaClientHandler(this, mLogger)
+                mAlexaClient = new AlexaClientHandler(this)
         )
         ) throw new RuntimeException("Could not register AlexaClient platform interface");
 
         // PlaybackController
         if (!mEngine.registerPlatformInterface(
-                mPlaybackController = new PlaybackControllerHandler(this, mLogger)
+                mPlaybackController = new PlaybackControllerHandler(this)
         )
         ) throw new RuntimeException("Could not register PlaybackController platform interface");
 
         // SpeechRecognizer
         boolean wakeWordSupported = false;
         if (!mEngine.registerPlatformInterface(
-                mSpeechRecognizer = new SpeechRecognizerHandler(
-                        this,
-                        mLogger,
-                        wakeWordSupported,
-                        true
-                )
+                mSpeechRecognizer = new SpeechRecognizerHandler(this, wakeWordSupported, true)
         )
         ) throw new RuntimeException("Could not register SpeechRecognizer platform interface");
 
         // AudioPlayer
         if (!mEngine.registerPlatformInterface(
-                mAudioPlayer = new AudioPlayerHandler(mLogger, mAudioOutputProvider, mPlaybackController)
+                mAudioPlayer = new AudioPlayerHandler(mAudioOutputProvider, mPlaybackController)
         )
         ) throw new RuntimeException("Could not register AudioPlayer platform interface");
 
@@ -395,30 +364,28 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         // AlexaSpeaker
         if (!mEngine.registerPlatformInterface(
-                mAlexaSpeaker = new AlexaSpeakerHandler(this, mLogger)
+                mAlexaSpeaker = new AlexaSpeakerHandler(this)
         )
         ) throw new RuntimeException("Could not register AlexaSpeaker platform interface");
 
         // Alerts
         if (!mEngine.registerPlatformInterface(
-                mAlerts = new AlertsHandler(
-                        this,
-                        mLogger)
+                mAlerts = new AlertsHandler(this)
         )
         ) throw new RuntimeException("Could not register Alerts platform interface");
 
         // NetworkInfoProvider
         if (!mEngine.registerPlatformInterface(
-                mNetworkInfoProvider = new NetworkInfoProviderHandler(this, mLogger, mEngine)
+                mNetworkInfoProvider = new NetworkInfoProviderHandler(this, mEngine)
         )
         ) throw new RuntimeException("Could not register NetworkInfoProvider platform interface");
 
         // CBL Auth Handler
-        LoginWithAmazonCBL LoginHandler = new LoginWithAmazonCBL(this, mLogger);
+        LoginWithAmazonCBL LoginHandler = new LoginWithAmazonCBL(this);
 
         // AuthProvider
         if (!mEngine.registerPlatformInterface(
-                mAuthProvider = new AuthProviderHandler(this, mLogger, LoginHandler)
+                mAuthProvider = new AuthProviderHandler(this, LoginHandler)
         )
         ) throw new RuntimeException("Could not register AuthProvider platform interface");
 
@@ -427,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
         // Mock global preset
         if (!mEngine.registerPlatformInterface(
-                mGlobalPresetHandler = new GlobalPresetHandler(this, mLogger)
+                mGlobalPresetHandler = new GlobalPresetHandler(this)
         )) throw new RuntimeException("Could not register Mock Global Preset platform interface");
 
         // Start the engine
@@ -510,8 +477,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void onDestroy() {
-        if (mLogger != null) mLogger.postInfo(TAG, "Engine stopped");
-        else Log.i(TAG, "Engine stopped");
+        Log.i(TAG, "Engine stopped");
 
         if (mAudioCueStartVoice != null) {
             mAudioCueStartVoice.release();
@@ -570,11 +536,9 @@ public class MainActivity extends AppCompatActivity implements Observer {
                         mSpeechRecognizer.onTapToTalk();
                     } else {
                         // Notify Error state to AutoVoiceChrome
-
                         String message = "AlexaClient not connected. ConnectionStatus: "
                                 + mAlexaClient.getConnectionStatus();
-                        if (mLogger != null) mLogger.postWarn(TAG, message);
-                        else Log.w(TAG, message);
+                        Log.w(TAG, message);
                     }
                 }
             });
@@ -588,12 +552,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
                         mIsTalkButtonLongPressed = true;
                         mSpeechRecognizer.onHoldToTalk();
                     } else {
-                        // Notify Error state to AutoVoiceChrome
-
-                        if (mLogger != null) {
-                            mLogger.postWarn(TAG,
-                                    "ConnectionStatus: DISCONNECTED");
-                        } else Log.w(TAG, "ConnectionStatus: DISCONNECTED");
+                        Log.w(TAG, "ConnectionStatus: DISCONNECTED");
                     }
                     return true;
                 }

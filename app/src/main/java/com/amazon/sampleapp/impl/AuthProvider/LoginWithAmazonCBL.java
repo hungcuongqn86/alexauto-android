@@ -24,7 +24,6 @@ import android.content.SharedPreferences;
 import com.amazon.aace.alexa.AuthProvider;
 import com.amazon.aace.network.NetworkInfoProvider;
 import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkConnectionObserver;
 import com.amazon.sampleapp.logView.LogRecyclerViewAdapter;
 
@@ -83,7 +82,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
 
     private final SharedPreferences mPreferences;
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
 
     // List of Authentication observers
     private Set<AuthStateObserver> mObservers;
@@ -104,12 +102,10 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
     private TimerTask mAuthorizationTimerTask;
     private TimerTask mRefreshTimerTask;
 
-    public LoginWithAmazonCBL( Activity activity,
-                       LoggerHandler logger ) {
+    public LoginWithAmazonCBL( Activity activity) {
         mActivity = activity;
         mPreferences = activity.getSharedPreferences(
                 activity.getString( R.string.preference_file_key ), Context.MODE_PRIVATE );
-        mLogger = logger;
 
         mClientId = mPreferences.getString( mActivity.getString( R.string.preference_client_id ), "" );
         mProductID = mPreferences.getString( mActivity.getString( R.string.preference_product_id ), "" );
@@ -161,7 +157,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                         if ( responseCode == sResponseOk ) response = con.getInputStream();
 
                     } catch ( IOException e ) {
-                        mLogger.postError( sTag, e.getMessage() );
                     } finally {
                         if ( con != null ) con.disconnect();
                         if ( os != null ) {
@@ -169,8 +164,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                                 os.flush();
                                 os.close();
                             } catch ( IOException e ) {
-                                mLogger.postWarn( sTag, "Cannot close resource. Error: "
-                                        + e.getMessage() );
                             }
                         }
                     }
@@ -184,20 +177,13 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                         JSONObject renderJSON = new JSONObject();
                         renderJSON.put( "verification_uri", uri );
                         renderJSON.put( "user_code", code );
-                        mLogger.postDisplayCard( renderJSON, LogRecyclerViewAdapter.CBL_CODE );
-
-                        // Log response
-                        mLogger.postInfo( sTag,
-                                String.format( "Verification URI with user code: %s?cbl-code=%s",
-                                uri, code ) );
-
                         requestDeviceToken( responseJSON );
 
-                    } else mLogger.postError( sTag, "Error requesting device authorization" );
+                    }
 
-                } else mLogger.postWarn( sTag, "Cannot authenticate. Please review the configuration file in the app's assets directory." );
+                }
 
-            } catch ( Exception e ) { mLogger.postError( sTag, e.getMessage() ); }
+            } catch ( Exception e ) {}
         }
     }
 
@@ -255,9 +241,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                                 // Refresh access token automatically before expiry
                                 startRefreshTimer( Long.parseLong( expiresInSeconds ), refreshToken );
 
-                                mLogger.postVerbose( sTag,
-                                        "AuthState and token refreshed");
-
                                 mCurrentAuthState = AuthProvider.AuthState.REFRESHED;
                                 mCurrentAuthError = AuthProvider.AuthError.NO_ERROR;
                                 notifyAuthObservers();
@@ -270,7 +253,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
 
                         } catch ( Exception e ) {
                             this.cancel();
-                            mLogger.postError( sTag, e.getMessage() );
                             return;
                         } finally {
                             if ( con != null ) con.disconnect();
@@ -279,16 +261,12 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                                     os.flush();
                                     os.close();
                                 } catch ( IOException e ) {
-                                    mLogger.postWarn( sTag, "Cannot close resource. Error: "
-                                            + e.getMessage() );
                                 }
                             }
                             if ( in != null ) {
                                 try {
                                     in.close();
                                 } catch ( IOException e ) {
-                                    mLogger.postWarn( sTag, "Cannot close resource. Error: "
-                                            + e.getMessage() );
                                 }
                             }
                         }
@@ -302,17 +280,13 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                             // Log code expired card
                             JSONObject renderJSON = new JSONObject();
                             renderJSON.put( "message", expiredMessage );
-                            mLogger.postDisplayCard( renderJSON, LogRecyclerViewAdapter.CBL_CODE_EXPIRED );
                         } catch ( JSONException e ) {
-                            mLogger.postError( sTag, "JSON Error: " + e.getMessage() );
                             return;
                         }
-                        mLogger.postWarn( sTag, expiredMessage );
                     }
                 }
             }, 0, sPollInterval * 1000 );
         } catch ( Exception e ) {
-            mLogger.postError( sTag, "Error requesting device token. Error: " + e.getMessage() );
         }
     }
 
@@ -333,11 +307,8 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                 JSONObject responseJSON = getResponseJSON( urlConnection.getInputStream() );
                 urlConnection.disconnect();
                 if ( responseJSON == null ) {
-                    mLogger.postError( sTag, "Error requesting Token Info. Error: Null JSON Response" );
                 } else {
                     if (!mClientId.equals( responseJSON.getString("aud") ) ) {
-                        // the access token does not belong to us
-                        mLogger.postError( sTag, "Error requesting Token Info. Error: Invalid access token");
                     } else {
                         try {
                             requestUrl = new URL(sProfileRequestUrl);
@@ -345,37 +316,17 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                             urlConnection.setRequestMethod("GET");
                             urlConnection.setRequestProperty("Host", "api.amazon.com");
                             urlConnection.setRequestProperty("Authorization", "bearer " + accessToken);
-
-                            responseCode = urlConnection.getResponseCode();
-
-                            if (responseCode == HttpURLConnection.HTTP_OK) {
-                                try {
-                                    responseJSON = getResponseJSON(urlConnection.getInputStream());
-                                    if ( responseJSON == null ) {
-                                        mLogger.postError(sTag, "Error requesting User Profile. Error: null JSON Response");
-                                    } else {
-                                        mLogger.postInfo(sTag, String.format("USER PROFILE: Name: %s, Email: %s, User ID: %s",
-                                                responseJSON.getString("name"),
-                                                responseJSON.getString("email"),
-                                                responseJSON.getString("user_id")));
-                                    }
-
-                                } catch (Exception e) {
-                                    mLogger.postError(sTag, "Error requesting User Profile. Error: " + e.getMessage());
-                                }
-                            } else
-                                mLogger.postInfo(sTag, "User Profile request failed with code: " + responseCode);
+                            urlConnection.getResponseCode();
                             if (urlConnection != null) {
                                 urlConnection.disconnect();
                             }
                         } catch (Exception e) {
-                            mLogger.postError(sTag, "Error requesting Token Info. Error: " + e.getMessage());
+
                         }
                     }
                 }
-            } else mLogger.postInfo( sTag, "Token Info request failed with code: " + responseCode);
+            }
         } catch( Exception e ) {
-            mLogger.postError( sTag, "Error while requesting User Profile. Error: " + e.getMessage() );
         }
     }
 
@@ -412,7 +363,7 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                     if ( responseCode == sResponseOk ) response = con.getInputStream();
 
                 } catch ( IOException e ) {
-                    mLogger.postError( sTag, e.getMessage() );
+
                 } finally {
                     if ( con != null ) con.disconnect();
                     if ( os != null ) {
@@ -420,8 +371,7 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                             os.flush();
                             os.close();
                         } catch ( IOException e ) {
-                            mLogger.postWarn( sTag, "Cannot close resource. Error: "
-                                    + e.getMessage() );
+
                         }
                     }
                 }
@@ -437,16 +387,12 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                         // Refresh access token automatically before expiry
                         startRefreshTimer( Long.parseLong( expiresInSeconds ), mRefreshToken );
 
-                        mLogger.postVerbose( sTag,
-                                "AuthState and token refreshed");
 
                         mCurrentAuthState = AuthProvider.AuthState.REFRESHED;
                         mCurrentAuthError = AuthProvider.AuthError.NO_ERROR;
                         notifyAuthObservers();
 
                     } catch ( JSONException e ) {
-                        mLogger.postError( sTag, "Error refreshing auth token. Error: "
-                                + e.getMessage() );
                     }
 
                 } else {
@@ -454,12 +400,9 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                     mCurrentAuthError = AuthProvider.AuthError.AUTHORIZATION_FAILED;
                     mCurrentAuthToken = "";
                     notifyAuthObservers();
-                    mLogger.postError( sTag, "Error refreshing auth token" );
                 }
 
-            } else mLogger.postWarn( sTag, String.format(
-                "Invalid Auth Parameters, clientID: %s",
-                    mClientId, mRefreshToken ) );
+            }
         }
     }
 
@@ -467,7 +410,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
         mTimer.schedule( mRefreshTimerTask = new TimerTask() {
             public void run() {
                 if ( !mConnected ) {
-                    mLogger.postWarn(sTag, "No Internet connection, cannot refresh the expired access token. Logout or check internet connectivity.");
                     mCurrentAuthState = AuthProvider.AuthState.EXPIRED;
                     mCurrentAuthError = AuthProvider.AuthError.AUTHORIZATION_EXPIRED;
                     mCurrentAuthToken = "";
@@ -479,14 +421,12 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
     }
 
     public void authorize() {
-        mLogger.postInfo( sTag, "Attempting to authenticate" );
         if ( mConnected ) {
             if ( mAuthorizationTimerTask != null ) {
                 mAuthorizationTimerTask.cancel();
             }
             requestDeviceAuthorization();
         } else {
-            mLogger.postWarn( sTag, "Internet not available. Please verify your network settings." );
             AlertDialog.Builder builder = new AlertDialog.Builder( mActivity ) ;
             builder.setTitle( "Internet not available" );
             builder.setIcon( android.R.drawable.ic_dialog_alert );
@@ -499,8 +439,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
     }
 
     public void deauthorize() {
-        mLogger.postInfo( sTag, "Attempting to un-authenticate" );
-
         // stop refresh timer task
         if ( mRefreshTimerTask != null ) mRefreshTimerTask.cancel();
 
@@ -525,14 +463,10 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
                 while ( ( inputLine = in.readLine() ) != null ) response.append( inputLine );
                 return new JSONObject( response.toString() );
             } catch ( Exception e ) {
-                mLogger.postError( sTag, e.getMessage() );
             } finally {
                 try {
                     inStream.close();
-                } catch ( IOException e ) {
-                    mLogger.postWarn( sTag, "Cannot close resource. Error: "
-                            + e.getMessage() );
-                }
+                } catch ( IOException e ) { }
             }
         }
         return null;
@@ -571,8 +505,6 @@ public class LoginWithAmazonCBL implements AuthHandler, NetworkConnectionObserve
             if ( mCurrentAuthState != AuthProvider.AuthState.REFRESHED && !"".equals( refreshToken ) ) {
                 if ( mConnectionStatus ) {
                     refreshAuthToken( refreshToken );
-                } else {
-                    mLogger.postInfo(sTag, "No internet connection, cannot refresh connection for the previously logged in user.");
                 }
             }
         }

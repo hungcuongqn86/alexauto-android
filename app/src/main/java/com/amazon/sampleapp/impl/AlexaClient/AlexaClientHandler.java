@@ -20,46 +20,33 @@ import android.widget.TextView;
 
 import com.amazon.aace.alexa.AlexaClient;
 import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
-// AutoVoiceChrome imports
 
 public class AlexaClientHandler extends AlexaClient {
 
     private static final String TAG = AlexaClientHandler.class.getSimpleName();
 
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
     private TextView mConnectionText, mAuthText, mDialogText;
     private ConnectionStatus mConnectionStatus = ConnectionStatus.DISCONNECTED;
     // AutoVoiceChrome controller
 
-    public AlexaClientHandler( Activity activity, LoggerHandler logger ) {
+    public AlexaClientHandler( Activity activity) {
         mActivity = activity;
-        mLogger = logger;
         setupGUI();
     }
 
     @Override
     public void dialogStateChanged( final DialogState state ) {
-        mLogger.postInfo( TAG,  "Dialog State Changed. STATE: " + state );
         mActivity.runOnUiThread( new Runnable() {
             @Override
             public void run() {
                 mDialogText.setText( state != null ? state.toString() : "" );
             }
         });
-
-        // Notify dialog state change to AutoVoiceChrome
     }
 
     @Override
     public void authStateChanged( final AuthState state, final AuthError error ) {
-        if ( error == AuthError.NO_ERROR ) {
-            mLogger.postInfo( TAG, "Auth State Changed. STATE: " + state );
-        } else {
-            mLogger.postWarn( TAG, String.format( "Auth State Changed. STATE: %s, ERROR: %s",
-                    state, error ) );
-        }
         mActivity.runOnUiThread( new Runnable() {
             @Override
             public void run() {
@@ -72,8 +59,6 @@ public class AlexaClientHandler extends AlexaClient {
     public void connectionStatusChanged( final ConnectionStatus status,
                                          final ConnectionChangedReason reason ) {
         mConnectionStatus = status;
-        mLogger.postInfo( TAG, String.format( "Connection Status Changed. STATUS: %s, REASON: %s",
-                status, reason ) );
         mActivity.runOnUiThread( new Runnable() {
             @Override
             public void run() {
@@ -95,6 +80,5 @@ public class AlexaClientHandler extends AlexaClient {
         mAuthText.setText( AlexaClient.AuthState.UNINITIALIZED.toString() );
         mDialogText.setText(AlexaClient.DialogState.IDLE.toString() );
     }
-
     // AutoVoiceChrome related functions
 }

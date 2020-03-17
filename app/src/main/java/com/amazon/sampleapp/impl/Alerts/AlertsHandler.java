@@ -16,33 +16,25 @@
 package com.amazon.sampleapp.impl.Alerts;
 
 import android.app.Activity;
-import android.view.View;
 import android.widget.TextView;
 
 import com.amazon.aace.alexa.Alerts;
-import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 public class AlertsHandler extends Alerts {
 
     private static final String sTag = "Alerts";
 
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
     private TextView mStateText;
 
-    public AlertsHandler( Activity activity,
-                          LoggerHandler logger ) {
+    public AlertsHandler( Activity activity) {
         mActivity = activity;
-        mLogger = logger;
     }
 
     @Override
     public void alertStateChanged( final String alertToken,
                                    final AlertState state,
                                    final String reason ) {
-        mLogger.postInfo( sTag, String.format( "Alert State Changed. STATE: %s, REASON: %s, TOKEN: %s",
-                state, reason, alertToken ) );
         mActivity.runOnUiThread( new Runnable() {
             @Override
             public void run() { mStateText.setText( state != null ? state.toString() : "" ); }
@@ -51,21 +43,17 @@ public class AlertsHandler extends Alerts {
 
     @Override
     public void alertCreated( String alertToken, String detailedInfo ) {
-        mLogger.postInfo(sTag, String.format( "Alert Created. TOKEN: %s, Detailed Info payload: %s", alertToken, detailedInfo ) );
     }
 
     @Override
     public void alertDeleted( String alertToken ) {
-        mLogger.postInfo(sTag, String.format( "Alert Deleted. TOKEN: %s", alertToken ) );
     }
 
     private void onLocalStop() {
-        mLogger.postInfo( sTag, "Stopping active alert" );
         super.localStop();
     }
 
     private void onRemoveAllAlerts( ) {
-        mLogger.postInfo( sTag, "Removing all pending alerts from storage" );
         super.removeAllAlerts();
     }
 }

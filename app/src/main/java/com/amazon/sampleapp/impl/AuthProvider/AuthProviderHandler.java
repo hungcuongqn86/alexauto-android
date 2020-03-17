@@ -21,7 +21,6 @@ import android.widget.ImageButton;
 
 import com.amazon.aace.alexa.AuthProvider;
 import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,7 +29,6 @@ public class AuthProviderHandler extends AuthProvider implements AuthStateObserv
 
     private static final String sTag = "AuthProvider";
 
-    private final LoggerHandler mLogger;
     private final Activity mActivity;
     private AuthHandler mAuthHandler;
 
@@ -41,8 +39,7 @@ public class AuthProviderHandler extends AuthProvider implements AuthStateObserv
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
 
-    public AuthProviderHandler(Activity activity, LoggerHandler logger, AuthHandler handler ) {
-        mLogger = logger;
+    public AuthProviderHandler(Activity activity, AuthHandler handler ) {
         mActivity = activity;
 
         mAuthHandler = handler;
@@ -52,22 +49,17 @@ public class AuthProviderHandler extends AuthProvider implements AuthStateObserv
 
     @Override
     public String getAuthToken() {
-        if ( mAuthToken.equals( "" ) ) {
-            mLogger.postWarn( sTag, "Auth token is not set" );
-        }
         return mAuthToken;
     }
 
     @Override
     public AuthState getAuthState() {
-        mLogger.postVerbose( sTag, String.format( "Auth State Retrieved. STATE: %s", mAuthState ) );
         return mAuthState;
     }
 
     public void onAuthStateChanged( AuthState state, AuthError error, String token ) {
         mAuthToken = token;
         mAuthState = state;
-        mLogger.postVerbose( sTag, String.format( "Auth State Changed. STATE: %s, ERROR: %s ", mAuthState, error) );
         mExecutor.execute( new AuthStateChangedRunnable( mAuthState, error));
     }
 

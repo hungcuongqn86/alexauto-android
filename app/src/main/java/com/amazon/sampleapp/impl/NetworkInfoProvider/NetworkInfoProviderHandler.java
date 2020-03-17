@@ -37,7 +37,6 @@ import com.amazon.aace.core.Engine;
 import com.amazon.aace.network.NetworkInfoProvider;
 import com.amazon.aace.network.NetworkProperties;
 import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -47,7 +46,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
     private static final String sTag = "NetworkInfoProvider";
 
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
     private final Engine mEngine;
     private final WifiManager mWifiManager;
     private final ConnectivityManager mConnectivityManager;
@@ -61,9 +59,8 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
     // List of Network Connection observers
     private Set<NetworkConnectionObserver> mObservers;
 
-    public NetworkInfoProviderHandler( Activity activity, LoggerHandler logger, Engine engine ) {
+    public NetworkInfoProviderHandler( Activity activity, Engine engine ) {
         mActivity = activity;
-        mLogger = logger;
         mEngine = engine;
         mStatus = NetworkStatus.UNKNOWN;
 
@@ -100,9 +97,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
             if ( mConnectivityManager != null ) {
                 updateNetworkStatus();
                 int rssi = mWifiManager.getConnectionInfo().getRssi();
-
-                mLogger.postInfo( sTag, String.format( "Network status changed. STATUS: %s, RSSI: %s",
-                        mStatus, rssi ) );
                 updateGUI( mStatus );
                 networkStatusChanged( mStatus, rssi );
                 notifyConnectionStatusObservers( mStatus );

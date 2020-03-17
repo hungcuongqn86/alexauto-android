@@ -23,7 +23,6 @@ import android.support.annotation.Nullable;
 
 import com.amazon.aace.audio.AudioOutput;
 import com.amazon.aace.audio.AudioStream;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 /**
  * A @c AudioOutput capable to play raw PCM 16 bit data @ 16 KHZ.
@@ -33,7 +32,6 @@ public class RawAudioOutputHandler extends AudioOutput {
     private static final String sTag = "RawAudioAudioOutputHandler";
 
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
     private final String mName;
     private AudioTrack mAudioTrack;
     private Thread mAudioPlaybackThread;
@@ -43,10 +41,8 @@ public class RawAudioOutputHandler extends AudioOutput {
 
     public RawAudioOutputHandler(
         Activity activity,
-        LoggerHandler logger,
         String name ) {
         mActivity = activity;
-        mLogger = logger;
         mName = name;
 
         initializePlayer();
@@ -83,7 +79,6 @@ public class RawAudioOutputHandler extends AudioOutput {
 
     @Override
     public boolean prepare( AudioStream stream, boolean repeating ) {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling prepare()", mName ) );
         mAudioStream = stream;
         resetPlayer();
         return true;
@@ -96,7 +91,6 @@ public class RawAudioOutputHandler extends AudioOutput {
 
     @Override
     public boolean play() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling play()", mName ) );
         mAudioTrack.play();
         mAudioPlaybackThread = new Thread(new AudioSampleReadWriteRunnable());
         mAudioPlaybackThread.start();
@@ -105,28 +99,24 @@ public class RawAudioOutputHandler extends AudioOutput {
 
     @Override
     public boolean stop() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling stop()", mName ) );
         mAudioTrack.stop();
         return true;
     }
 
     @Override
     public boolean pause() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling pause()", mName ) );
         mAudioTrack.pause();
         return true;
     }
 
     @Override
     public boolean resume() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling resume()", mName ) );
         mAudioTrack.play();
         return true;
     }
 
     @Override
     public boolean setPosition( long position ) {
-        mLogger.postVerbose( sTag, String.format( "(%s) Seek is not supported for Raw Audio") );
         return true;
     }
 
@@ -138,12 +128,10 @@ public class RawAudioOutputHandler extends AudioOutput {
     //
 
     private void onPlaybackStarted () {
-        mLogger.postVerbose( sTag, String.format( "(%s) Media State Changed. STATE: PLAYING", mName ) );
         mediaStateChanged( MediaState.PLAYING );
     }
 
     private void onPlaybackStopped () {
-        mLogger.postVerbose( sTag, String.format( "(%s) Media State Changed. STATE: STOPPED", mName ) );
         mediaStateChanged( MediaState.STOPPED );
     }
 
@@ -153,7 +141,6 @@ public class RawAudioOutputHandler extends AudioOutput {
             onPlaybackStarted();
 
             try {
-                mLogger.postVerbose(sTag, String.format("(%s) Audio Playback loop started", mName));
                 byte[] audioBuffer = new byte[640];
                 while (isPlaying() && !mAudioStream.isClosed()) {
                     int dataRead = mAudioStream.read(audioBuffer);
@@ -162,14 +149,11 @@ public class RawAudioOutputHandler extends AudioOutput {
                     }
                 }
             } catch (Exception exp) {
-                mLogger.postError( sTag, exp.getMessage() );
                 String message = exp.getMessage() != null ? exp.getMessage() : "";
                 mediaError(MediaError.MEDIA_ERROR_UNKNOWN, message);
             } finally {
                 onPlaybackStopped();
             }
-
-            mLogger.postVerbose(sTag, String.format("(%s) Audio Playback loop exited", mName));
         }
     }
 
@@ -177,7 +161,6 @@ public class RawAudioOutputHandler extends AudioOutput {
     public boolean volumeChanged( float volume ) {
         if(mVolume == volume)
             return true;
-        mLogger.postInfo( sTag, String.format( "(%s) Handling setVolume(%s)", mName, volume ) );
         mVolume = volume;
         if ( mMutedState == MutedState.MUTED ) {
             mAudioTrack.setVolume( 0 );
@@ -190,7 +173,6 @@ public class RawAudioOutputHandler extends AudioOutput {
     @Override
     public boolean mutedStateChanged( MutedState state ) {
         if( state != mMutedState ) {
-            mLogger.postInfo( sTag, String.format( "Muted state changed (%s) to %s.", mName, state ) );
             mAudioTrack.setVolume( state == MutedState.MUTED ? 0 : mVolume );
             mMutedState = state;
         }

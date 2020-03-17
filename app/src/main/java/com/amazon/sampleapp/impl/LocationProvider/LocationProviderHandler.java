@@ -32,7 +32,6 @@ import android.widget.TextView;
 import com.amazon.aace.location.LocationProvider;
 import com.amazon.aace.location.Location;
 import com.amazon.sampleapp.R;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,8 +59,6 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
     private TextView mLatLongText;
     /// A reference to the containing activity
     private final Activity mActivity;
-    /// The Logger instance
-    private final LoggerHandler mLogger;
     /// The object providing access to system location services
     private final LocationManager mLocationManager;
     /// The object handling geocoding for mock location
@@ -73,10 +70,8 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
     /// Whether mock location is in use
     private boolean mMockLocationEnabled = false;
 
-    public LocationProviderHandler( Activity activity, LoggerHandler logger ) {
+    public LocationProviderHandler( Activity activity ) {
         mActivity = activity;
-        mLogger = logger;
-
         // Initialize GUI components
         setupGUI();
 
@@ -107,9 +102,6 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
                     mMockLocation.getAltitude());
         }
         if ( mCurrentLocation == null ) {
-            mLogger.postVerbose( TAG,
-                    "No location found. Geolocation context will not be sent. " +
-                    "Defaulting to AVS cloud. ");
             // null indicates no current available location
             return null;
         }
@@ -133,19 +125,16 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
 
     @Override
     public void onProviderDisabled(String provider) {
-        mLogger.postVerbose( TAG, String.format("provider disabled: %s", provider) );
+
     }
 
     @Override
     public void onProviderEnabled(String provider) {
-        mLogger.postVerbose( TAG, String.format("provider enabled: %s", provider) );
         requestLocationUpdates( provider );
     }
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
-        mLogger.postVerbose( TAG,
-                String.format("provider status changed: %s, status: %s", provider, status) );
     }
 
     /**
@@ -154,13 +143,10 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
      * @param provider The name of the provider with which to register
      */
     private void requestLocationUpdates( String provider ) {
-        mLogger.postVerbose( TAG, String.format("Requesting location updates using %s", provider) );
         try {
             // Request updates from the provider only if it's enabled
             if ( !mLocationManager.isProviderEnabled( provider ) ) {
-                mLogger.postInfo( TAG, String.format(
-                        "Request location updates attempted, but %s location provider is disabled",
-                        provider) );
+
             } else {
                 mLocationManager.requestLocationUpdates(
                         provider,
@@ -169,7 +155,6 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
                         this );
             }
         } catch ( SecurityException e ) {
-            mLogger.postError( TAG, e.getMessage() );
         }
     }
 
@@ -183,19 +168,16 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
         try {
             // Request location from the provider only if it's enabled
             if ( !mLocationManager.isProviderEnabled( provider ) ) {
-                mLogger.postInfo( TAG, String.format(
-                        "Attempted to get last known location but %s location provider is disabled",
-                        provider) );
+
             } else {
                 // Get the last known fix from the provider and update the current location estimate
                 android.location.Location lastKnownLocation =
                         mLocationManager.getLastKnownLocation( provider );
                 if ( lastKnownLocation != null ) setLocation(lastKnownLocation);
-                else mLogger.postInfo( TAG, String.format("last %s location not found", provider) );
             }
         }
         catch ( SecurityException e ) {
-            mLogger.postError( TAG, e.getMessage() );
+
         }
     }
 
@@ -211,12 +193,10 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
             // Only update if accuracy is equivalent or better or 2 mins since last update
             if ( location.getAccuracy() <= mCurrentLocation.getAccuracy() ||
                     System.currentTimeMillis() - mCurrentLocation.getTime() > LOCATION_UPDATE_TIMEOUT ) {
-                mLogger.postVerbose( TAG, "location updated: " + locationToString( location ) );
                 mCurrentLocation = location;
                 setGUILocation( mCurrentLocation );
             }
         } else {
-            mLogger.postVerbose( TAG, "location updated: " + locationToString( location ) );
             mCurrentLocation = location;
             setGUILocation(mCurrentLocation);
         }
@@ -231,10 +211,8 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
     private void enableMockLocation( boolean enable ) {
         mMockLocationEnabled = enable;
         if ( enable ) {
-            mLogger.postInfo( TAG, "Using mock location" );
             setGUILocation( mMockLocation );
         } else {
-            mLogger.postInfo( TAG, "Using device location" );
             if( mCurrentLocation != null) {
                 setGUILocation( mCurrentLocation );
             }
@@ -253,8 +231,7 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
             try {
                 List<Address> addressList = mGeocoder.getFromLocationName( location, 1 );
                 if ( addressList == null || addressList.size() == 0 ) {
-                    mLogger.postWarn( TAG, String.format( "No match found by the geocoder for the "
-                            + "location \"%s\". " + "Location not updated.", location ) );
+
                 } else {
                     Address address = addressList.get( 0 );
                     mMockLocation = new android.location.Location( "" );
@@ -263,13 +240,10 @@ public class LocationProviderHandler extends LocationProvider implements Locatio
                     mMockLocation.setAltitude( 0 );
                     mMockLocation.setAccuracy( 0 );
                     mMockLocation.setTime( System.currentTimeMillis() );
-                    mLogger.postInfo( TAG, String.format("Location set to \"%s\" (%.3f, %.3f)",
-                            location, address.getLatitude(), address.getLongitude()) );
                     setGUILocation( mMockLocation );
                 }
             } catch ( IOException e ) {
-                mLogger.postWarn( TAG,
-                        String.format( "Unable to geocode the provided location \"%s\"", location ) );
+
             }
         }
     }

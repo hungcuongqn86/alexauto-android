@@ -21,19 +21,16 @@ import android.os.Message;
 import com.amazon.aace.alexa.AudioPlayer;
 import com.amazon.aace.audio.AudioOutput;
 import com.amazon.sampleapp.impl.Audio.AudioOutputProviderHandler;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 
 public class AudioPlayerHandler extends AudioPlayer
 {
     private static String TAG = AudioPlayerHandler.class.getSimpleName();
-    private LoggerHandler mLogger = null;
     private AudioOutputProviderHandler mAudioOutputProvider = null;
     private PlaybackControllerHandler mPlaybackController = null;
     private AudioPlayerStateHandler mAudioPlayerStateHandler = null;
 
-    public AudioPlayerHandler( LoggerHandler logger, AudioOutputProviderHandler audioOutputProvider, PlaybackControllerHandler playbackController ) {
-        mLogger = logger;
+    public AudioPlayerHandler( AudioOutputProviderHandler audioOutputProvider, PlaybackControllerHandler playbackController ) {
         mPlaybackController = playbackController;
         mAudioOutputProvider = audioOutputProvider;
         mAudioPlayerStateHandler = new AudioPlayerStateHandler();
@@ -41,7 +38,6 @@ public class AudioPlayerHandler extends AudioPlayer
 
     @Override
     public void playerActivityChanged(AudioPlayer.PlayerActivity state) {
-        mLogger.postInfo( TAG, String.format( "playerActivityChanged: %s", state.toString() ) );
         mAudioPlayerStateHandler.sendEmptyMessage( state.ordinal() );
     }
 

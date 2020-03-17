@@ -25,7 +25,6 @@ import com.amazon.aace.alexa.AuthProvider.AuthError;
 import com.amazon.aace.audio.AudioOutput;
 import com.amazon.aace.audio.AudioStream;
 import com.amazon.sampleapp.impl.AuthProvider.AuthStateObserver;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -45,7 +44,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     private final Activity mActivity;
     private final Context mContext;
-    private final LoggerHandler mLogger;
     private final String mName;
     private final MediaSourceFactory mMediaSourceFactory;
     private SimpleExoPlayer mPlayer;
@@ -63,13 +61,11 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
     private boolean mNewPlayReceieved;
 
     public AudioOutputHandler( Activity activity,
-                               LoggerHandler logger,
                                String name ) {
         mActivity = activity;
         mContext = activity.getApplicationContext();
-        mLogger = logger;
         mName = name;
-        mMediaSourceFactory = new MediaSourceFactory( mContext, mLogger, mName );
+        mMediaSourceFactory = new MediaSourceFactory( mContext, mName );
         mRepeating = false;
         mPeriod = new Timeline.Period();
 
@@ -103,7 +99,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     @Override
     public boolean prepare( AudioStream stream, boolean repeating ) {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling prepare()", mName ) );
         resetPlayer();
         mRepeating = repeating;
         try ( FileOutputStream os = mContext.openFileOutput( sFileName, Context.MODE_PRIVATE ) ) {
@@ -113,7 +108,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
                 while ( ( size = stream.read( buffer ) ) > 0 ) os.write( buffer, 0, size );
             }
         } catch ( IOException e ) {
-            mLogger.postError( sTag, e );
             return false;
         }
 
@@ -123,7 +117,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
             mPlayer.prepare( mediaSource, true, false );
             return true;
         } catch ( Exception e ) {
-            mLogger.postError( sTag, e.getMessage() );
             String message = e.getMessage() != null ? e.getMessage() : "";
             mediaError( MediaError.MEDIA_ERROR_UNKNOWN, message );
             return false;
@@ -132,7 +125,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     @Override
     public boolean prepare( String url, boolean repeating ) {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling prepare(url)", mName ) );
         resetPlayer();
         mRepeating = repeating;
         Uri uri = Uri.parse( url );
@@ -142,7 +134,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
             return true;
         } catch ( Exception e ) {
             String message = e.getMessage() != null ? e.getMessage() : "";
-            mLogger.postError( sTag, message );
             mediaError( MediaError.MEDIA_ERROR_UNKNOWN, message );
             return false;
         }
@@ -150,7 +141,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     @Override
     public boolean play() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling play()", mName ) );
         mNewPlayReceieved = true; // remember new play received
         mSavedPeriodIndex = mPlayer.getCurrentPeriodIndex(); // remember period index
         mPlayer.setPlayWhenReady( true );
@@ -159,7 +149,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     @Override
     public boolean stop() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling stop()", mName ) );
         if ( !mPlayer.getPlayWhenReady() ) {
             // Player is already not playing. Notify Engine of stop
             onPlaybackStopped();
@@ -169,8 +158,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     @Override
     public boolean pause() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling pause()", mName ) );
-
         Timeline currentTimeline = mPlayer.getCurrentTimeline();
         if( !currentTimeline.isEmpty() && mPlayer.isCurrentWindowDynamic() ) { // If pausing live station.
             mLivePausedOffset = 0;
@@ -183,8 +170,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     @Override
     public boolean resume() {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling resume()", mName ) );
-
         Timeline currentTimeline = mPlayer.getCurrentTimeline();
         if ( !currentTimeline.isEmpty() && mPlayer.isCurrentWindowDynamic() ) {  // If resuming live station reset to 0.
             mPlayer.seekToDefaultPosition(); // reset player position to its default
@@ -202,7 +187,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
 
     @Override
     public boolean setPosition( long position ) {
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling setPosition(%s)", mName, position ) );
         mPlayer.seekTo( position );
         mLiveResumedOffset -= position;
         return true;
@@ -218,11 +202,9 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
                 mPosition -= mLiveResumedOffset; // Offset saved for live station stopped / played
                 mPosition -= mLivePausedOffset; // Offset saved for live station paused / resumed
             } else{
-                mLogger.postVerbose( sTag, String.format( "(%s) Handling livePaused getPosition(%s)", mName, mLivePausedPosition ) );
                 return mLivePausedPosition; // the saved position during a live station paused state
             }
         }
-        mLogger.postVerbose( sTag, String.format( "(%s) Handling getPosition(%s)", mName, mPosition ) );
         return mPosition;
     }
 
@@ -235,7 +217,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
     @Override
     public boolean volumeChanged( float volume ) {
         if( mVolume != volume ) {
-            mLogger.postInfo( sTag, String.format( "(%s) Handling volumeChanged(%s)", mName, volume ) );
             mVolume = volume;
             if ( mMutedState == MutedState.MUTED ) {
                 mPlayer.setVolume( 0 );
@@ -249,7 +230,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
     @Override
     public boolean mutedStateChanged( MutedState state ) {
         if( state != mMutedState ) {
-            mLogger.postInfo( sTag, String.format( "Muted state changed (%s) to %s.", mName, state ) );
             mPlayer.setVolume( state == MutedState.MUTED ? 0 : mVolume );
             mMutedState = state;
         }
@@ -261,7 +241,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
     //
 
     private void onPlaybackStarted () {
-        mLogger.postVerbose( sTag, String.format( "(%s) Media State Changed. STATE: PLAYING", mName ) );
         mediaStateChanged( MediaState.PLAYING );
 
         if ( mNewPlayReceieved && mPlayer.isCurrentWindowDynamic() ) { // remember offset if new play for live station
@@ -272,7 +251,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
     }
 
     private void onPlaybackStopped () {
-        mLogger.postVerbose( sTag, String.format( "(%s) Media State Changed. STATE: STOPPED", mName ) );
         mediaStateChanged( MediaState.STOPPED );
     }
 
@@ -282,20 +260,17 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
             mPlayer.setRepeatMode( Player.REPEAT_MODE_ONE );
         } else {
             mPlayer.setRepeatMode( Player.REPEAT_MODE_OFF );
-            mLogger.postVerbose( sTag, String.format( "(%s) Media State Changed. STATE: STOPPED", mName ) );
             mediaStateChanged( MediaState.STOPPED );
         }
     }
 
     private void onPlaybackBuffering () {
-        mLogger.postVerbose( sTag, String.format( "(%s) Media State Changed. STATE: BUFFERING", mName ) );
         mediaStateChanged( MediaState.BUFFERING );
     }
 
     @Override
     public void onAuthStateChanged(AuthState state, AuthError error, String token) {
         if ( state == AuthState.UNINITIALIZED ) {
-            mLogger.postInfo( sTag, String.format( "(%s) Auth state is uninitialized. Stopping media player", mName ) );
             // Stop playing media if user logs out
             stop();
         }
@@ -337,7 +312,6 @@ public class AudioOutputHandler extends AudioOutput implements AuthStateObserver
             } else {
                 message = e.getMessage();
             }
-            mLogger.postError( sTag, "PLAYER ERROR: " + message );
             mediaError( MediaError.MEDIA_ERROR_INTERNAL_DEVICE_ERROR, message );
         }
     }

@@ -21,7 +21,6 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
 import com.amazon.aace.audio.AudioInput;
-import com.amazon.sampleapp.impl.Logger.LoggerHandler;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -39,16 +38,13 @@ public class AudioInputHandler extends AudioInput
     private static final int sAudioFramesInBuffer = 5; // Create large enough buffer for 5 audio frames.
 
     private final Activity mActivity;
-    private final LoggerHandler mLogger;
     private final ExecutorService mExecutor = Executors.newFixedThreadPool( 1 );
 
     private AudioRecord mAudioInput;
     private AudioReaderRunnable mReaderRunnable;
 
-    public AudioInputHandler(  Activity activity,
-                               LoggerHandler logger ) {
+    public AudioInputHandler(  Activity activity) {
         mActivity = activity;
-        mLogger = logger;
         mAudioInput = createAudioInput();
     }
 
@@ -65,18 +61,13 @@ public class AudioInputHandler extends AudioInput
                 MediaRecorder.AudioSource.MIC, sSampleRateInHz,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT,
                 bufferSize);
-        } catch ( IllegalArgumentException e ) {
-            mLogger.postError( sTag, "Cannot create audio input. Error: "
-                + e.getMessage() );
-        }
+        } catch ( IllegalArgumentException e ) {}
         return audioRecord;
     }
 
     @Override
     public boolean startAudioInput() {
         if (mAudioInput == null) {
-            mLogger.postWarn( sTag,
-                "Cannot start audio input. AudioRecord could not be created" );
             return false;
         }
 
@@ -84,7 +75,6 @@ public class AudioInputHandler extends AudioInput
             // Retry AudioRecord initialization.
             mAudioInput = createAudioInput();
             if ( mAudioInput.getState() != AudioRecord.STATE_INITIALIZED ) {
-                mLogger.postWarn( sTag, "Cannot initialize AudioRecord" );
                 return false;
             }
         }
@@ -95,8 +85,6 @@ public class AudioInputHandler extends AudioInput
     @Override
     public boolean stopAudioInput() {
         if (mAudioInput == null) {
-            mLogger.postWarn( sTag,
-                "stopAudioInput() called but AudioRecord was never initialized" );
             return false;
         }
 
@@ -105,8 +93,6 @@ public class AudioInputHandler extends AudioInput
         try {
             mAudioInput.stop();
         } catch (IllegalStateException e) {
-            mLogger.postError(sTag, "AudioRecord cannot stop recording. Error: "
-                + e.getMessage());
             return false;
         }
 
@@ -115,16 +101,12 @@ public class AudioInputHandler extends AudioInput
 
     private boolean startRecording() {
         if (mReaderRunnable != null && mReaderRunnable.isRunning()) {
-            mLogger.postInfo(sTag,
-                "startRecording() called but AudioRecorder thread is already running" );
             return false;
         } else {
             // Start audio recording
             try {
                 mAudioInput.startRecording();
             } catch ( IllegalStateException e ) {
-                mLogger.postError( sTag, "AudioRecord cannot start recording. Error: "
-                    + e.getMessage() );
                 return false;
             }
 
@@ -132,9 +114,6 @@ public class AudioInputHandler extends AudioInput
             try {
                 mExecutor.submit( mReaderRunnable = new AudioReaderRunnable() ); // Submit the audio reader thread
             } catch ( RejectedExecutionException e) {
-                mLogger.postError( sTag,
-                    "Audio reader task cannot be scheduled for execution. Error: "
-                        + e.getMessage() );
                 return false;
             }
             return true;
