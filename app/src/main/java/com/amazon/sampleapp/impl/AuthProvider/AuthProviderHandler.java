@@ -21,9 +21,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AuthProviderHandler extends AuthProvider implements AuthStateObserver {
-
-    private static final String sTag = "AuthProvider";
-
     private final Activity mActivity;
     private AuthHandler mAuthHandler;
 
@@ -35,7 +32,6 @@ public class AuthProviderHandler extends AuthProvider implements AuthStateObserv
     public AuthProviderHandler(Activity activity, AuthHandler handler ) {
         mActivity = activity;
         mAuthHandler = handler;
-        setupGUI();
     }
 
     @Override
@@ -66,11 +62,6 @@ public class AuthProviderHandler extends AuthProvider implements AuthStateObserv
             authStateChange( state, error );
         }
     }
-
-    private void setupGUI() {
-
-    }
-
     // After Engine has been started, register this as observer of the auth handler
     public void onInitialize(){
         mAuthHandler.registerAuthStateObserver( this );
