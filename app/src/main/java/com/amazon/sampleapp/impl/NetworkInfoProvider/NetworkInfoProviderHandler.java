@@ -48,8 +48,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
     private final ConnectivityManager mConnectivityManager;
     private final NetworkChangeReceiver mReceiver;
     private TextView mNetworkStatusText;
-    private View mInterfaceEntry;
-    private EditText mInterfaceText;
 
     private NetworkStatus mStatus;
 
@@ -118,9 +116,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
 
     private void setupGUI() {
         mNetworkStatusText = mActivity.findViewById( R.id.networkStatus );
-
-        mInterfaceEntry = mActivity.findViewById( R.id.networkInterface);
-        mInterfaceText = mActivity.findViewById( R.id.networkInterfaceText );
     }
 
     private void updateGUI( final NetworkInfoProvider.NetworkStatus status ) {
