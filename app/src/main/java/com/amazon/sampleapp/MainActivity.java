@@ -68,8 +68,6 @@ import com.amazon.sampleapp.impl.Audio.AudioOutputProviderHandler;
 import com.amazon.sampleapp.impl.AudioPlayer.AudioPlayerHandler;
 import com.amazon.sampleapp.impl.AuthProvider.AuthProviderHandler;
 import com.amazon.sampleapp.impl.AuthProvider.LoginWithAmazonCBL;
-
-import com.amazon.sampleapp.impl.ExternalMediaPlayer.MACCPlayer;
 import com.amazon.sampleapp.impl.GlobalPreset.GlobalPresetHandler;
 
 import com.amazon.sampleapp.impl.LocationProvider.LocationProviderHandler;
@@ -158,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private MediaPlayer mAudioCueStartVoice; // Voice-initiated listening audio cue
     private MediaPlayer mAudioCueStartTouch; // Touch-initiated listening audio cue
     private MediaPlayer mAudioCueEnd; // End of listening audio cue
-    private MACCPlayer mMACCPlayer;
 
     private GlobalPresetHandler mGlobalPresetHandler;
 
