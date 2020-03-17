@@ -53,21 +53,14 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
         mActivity = activity;
         mEngine = engine;
         mStatus = NetworkStatus.UNKNOWN;
-
-        // Initialize GUI components
-        setupGUI();
-
         mObservers = new HashSet<>(1);
-
         Context context = mActivity.getApplicationContext();
         // Note: >=API 24 should use NetworkCallback to receive network change updates
         // instead of CONNECTIVITY_ACTION
         mReceiver = new NetworkChangeReceiver();
         context.registerReceiver( mReceiver, new IntentFilter( ConnectivityManager.CONNECTIVITY_ACTION ) );
-
         mWifiManager = ( WifiManager ) context.getSystemService( Context.WIFI_SERVICE );
         mConnectivityManager = ( ConnectivityManager ) context.getSystemService( Context.CONNECTIVITY_SERVICE );
-
         updateNetworkStatus();
     }
 
@@ -78,9 +71,7 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
 
     @Override
     public int getWifiSignalStrength() { return mWifiManager.getConnectionInfo().getRssi(); }
-
     public class NetworkChangeReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive( final Context context, final Intent intent )
         {
@@ -106,10 +97,6 @@ public class NetworkInfoProviderHandler extends NetworkInfoProvider {
                     }
                 });
         alertDialog.show();
-    }
-
-    private void setupGUI() {
-
     }
 
     private void updateNetworkStatus() {
