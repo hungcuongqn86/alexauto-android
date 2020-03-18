@@ -201,13 +201,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
         // Add support action toolbar for action buttons
         setSupportActionBar((Toolbar) findViewById(R.id.actionToolbar));
 
-        // Initialize RecyclerView list for log view
-        mRecyclerView = findViewById(R.id.rvLog);
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerAdapter = new LogRecyclerViewAdapter(getApplicationContext());
-        mRecyclerView.setAdapter(mRecyclerAdapter);
-
         // Initialize sound effects for speech recognition
         mAudioCueStartVoice = MediaPlayer.create(this, R.raw.med_ui_wakesound);
         mAudioCueStartTouch = MediaPlayer.create(this, R.raw.med_ui_wakesound_touch);
@@ -503,10 +496,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        final View drawer = findViewById(R.id.drawer);
-        drawer.setVisibility(View.VISIBLE);
-
         // Set tap-to-talk and hold-to-talk actions
         mTapToTalkIcon = menu.findItem(R.id.action_talk);
         initTapToTalk();
