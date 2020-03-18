@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.widget.TextView;
 
 import com.amazon.aace.alexa.AlexaClient;
-import com.amazon.sampleapp.R;
 
 public class AlexaClientHandler extends AlexaClient {
 
@@ -37,48 +36,25 @@ public class AlexaClientHandler extends AlexaClient {
 
     @Override
     public void dialogStateChanged( final DialogState state ) {
-        mActivity.runOnUiThread( new Runnable() {
-            @Override
-            public void run() {
-                mDialogText.setText( state != null ? state.toString() : "" );
-            }
-        });
+
     }
 
     @Override
     public void authStateChanged( final AuthState state, final AuthError error ) {
-        mActivity.runOnUiThread( new Runnable() {
-            @Override
-            public void run() {
-                mAuthText.setText( state != null ? state.toString() : "" );
-            }
-        });
+
     }
 
     @Override
     public void connectionStatusChanged( final ConnectionStatus status,
                                          final ConnectionChangedReason reason ) {
         mConnectionStatus = status;
-        mActivity.runOnUiThread( new Runnable() {
-            @Override
-            public void run() {
-                mConnectionText.setText( status != null ? status.toString() : "" );
-            }
-        });
-
         // Notify error state change to AutoVoiceChrome
     }
 
     public ConnectionStatus getConnectionStatus () { return mConnectionStatus; }
 
     private void setupGUI() {
-        mConnectionText = mActivity.findViewById( R.id.connectionState );
-        mAuthText = mActivity.findViewById( R.id.authState );
-        mDialogText = mActivity.findViewById( R.id.dialogState );
 
-        mConnectionText.setText( AlexaClient.ConnectionStatus.DISCONNECTED.toString() );
-        mAuthText.setText( AlexaClient.AuthState.UNINITIALIZED.toString() );
-        mDialogText.setText(AlexaClient.DialogState.IDLE.toString() );
     }
     // AutoVoiceChrome related functions
 }
