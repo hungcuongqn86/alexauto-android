@@ -129,8 +129,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     private GlobalPresetHandler mGlobalPresetHandler;
 
-    private LVCConfigReceiver mLVCConfigReceiver;
-
     private MenuItem mTapToTalkIcon;
     // Earcon Settings
     private boolean mDisableStartOfRequestEarcon;
@@ -140,111 +138,23 @@ public class MainActivity extends AppCompatActivity implements Observer {
     private Object mDisableStartOfRequestEarconLock = new Object();
     private Object mDisableEndOfRequestEarconLock = new Object();
 
+    private AsvAlexaPlugin asvAlexaPlugin = new AsvAlexaPlugin();
     /* AutoVoiceChrome Controller */
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Check if permissions are missing and must be requested
-        ArrayList<String> requests = new ArrayList<>();
-
-        for (String permission : sRequiredPermissions) {
-            if (ActivityCompat.checkSelfPermission(this, permission)
-                    == PackageManager.PERMISSION_DENIED) {
-                requests.add(permission);
-            }
-        }
-
-        // Request necessary permissions if not already granted, else start app
-        if (requests.size() > 0) {
-            ActivityCompat.requestPermissions(this,
-                    requests.toArray(new String[requests.size()]), sPermissionRequestCode);
-        } else create();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode == sPermissionRequestCode) {
-            if (grantResults.length > 0) {
-                for (int grantResult : grantResults) {
-                    if (grantResult == PackageManager.PERMISSION_DENIED) {
-                        // Permission request was denied
-                        Toast.makeText(this, "Permissions required",
-                                Toast.LENGTH_LONG).show();
-                    }
-                }
-                // Permissions have been granted. Start app
-                create();
-            } else {
-                // Permission request was denied
-                Toast.makeText(this, "Permissions required", Toast.LENGTH_LONG).show();
-            }
+        if (asvAlexaPlugin.reqPermission(this, this)) {
+            create();
         }
     }
 
     private void create() {
-
         // Set the main view content
         setContentView(R.layout.activity_main);
-
-        // Initialize LVCInteractionService to start LVC, if supported
-        initLVC();
-
         // Add support action toolbar for action buttons
         setSupportActionBar((Toolbar) findViewById(R.id.actionToolbar));
-
-        // Initialize sound effects for speech recognition
-        mAudioCueStartVoice = MediaPlayer.create(this, R.raw.med_ui_wakesound);
-        mAudioCueStartTouch = MediaPlayer.create(this, R.raw.med_ui_wakesound_touch);
-        mAudioCueEnd = MediaPlayer.create(this, R.raw.med_ui_endpointing_touch);
-
-        // Get shared preferences
-        mPreferences = getSharedPreferences(getString(R.string.preference_file_key),
-                Context.MODE_PRIVATE);
-
-        // Retrieve device config from config file and update preferences
-        String clientId = "", productId = "", productDsn = "";
-        JSONObject config = FileUtils.getConfigFromFile(getAssets(), sDeviceConfigFile, "config");
-        if (config != null) {
-            try {
-                clientId = config.getString("clientId");
-                productId = config.getString("productId");
-            } catch (JSONException e) {
-                Log.w(TAG, "Missing device info in app_config.json");
-            }
-            try {
-                productDsn = config.getString("productDsn");
-            } catch (JSONException e) {
-                try {
-                    // set Android ID as product DSN
-                    productDsn = Settings.Secure.getString(getContentResolver(),
-                            Settings.Secure.ANDROID_ID);
-                    Log.i(TAG, "android id for DSN: " + productDsn);
-                } catch (Error error) {
-                    productDsn = UUID.randomUUID().toString();
-                    Log.w(TAG, "android id not found, generating random DSN: " + productDsn);
-                }
-            }
-        }
-        updateDevicePreferences(clientId, productId, productDsn);
-    }
-
-    /**
-     * Start {@link LVCInteractionService}, the service that initializes and communicates with LVC,
-     * and register a broadcast receiver to receive the configuration from LVC provided through the
-     * {@link LVCInteractionService}
-     */
-    private void initLVC() {
-        // Register broadcast receiver for configuration from the LVCInteractionService
-        mLVCConfigReceiver = new LVCConfigReceiver();
-        IntentFilter filter = new IntentFilter(LVCInteractionService.LVC_RECEIVER_INTENT);
-        filter.addAction(Intent.ACTION_AIRPLANE_MODE_CHANGED);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mLVCConfigReceiver, filter);
-
-        // Start LVCInteractionService to communicate with LVC
-        startService(new Intent(this, LVCInteractionService.class));
+        asvAlexaPlugin.create();
     }
 
     /**
@@ -454,35 +364,7 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     @Override
     public void onDestroy() {
-        Log.i(TAG, "Engine stopped");
-
-        if (mAudioCueStartVoice != null) {
-            mAudioCueStartVoice.release();
-            mAudioCueStartVoice = null;
-        }
-        if (mAudioCueStartTouch != null) {
-            mAudioCueStartTouch.release();
-            mAudioCueStartTouch = null;
-        }
-        if (mAudioCueEnd != null) {
-            mAudioCueEnd.release();
-            mAudioCueEnd = null;
-        }
-
-        if (mLVCConfigReceiver != null) {
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(mLVCConfigReceiver);
-        }
-
-        if (mNetworkInfoProvider != null) {
-            mNetworkInfoProvider.unregister();
-        }
-
-        if (mEngine != null) {
-            mEngine.dispose();
-        }
-
-        // AutoVoiceChrome cleanup
-
+        asvAlexaPlugin.onDestroy();
         super.onDestroy();
     }
 
@@ -571,39 +453,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
                         // Play stop listening audio cue
                         mAudioCueEnd.start();
                     }
-                }
-            }
-        }
-    }
-
-    private void updateDevicePreferences(String clientId,
-                                         String productId,
-                                         String productDsn) {
-        SharedPreferences.Editor editor = mPreferences.edit();
-        editor.putString(getString(R.string.preference_client_id), clientId);
-        editor.putString(getString(R.string.preference_product_id), productId);
-        editor.putString(getString(R.string.preference_product_dsn), productDsn);
-        editor.apply();
-    }
-
-    /**
-     * Broadcast receiver to receive configuration from LVC provided through the
-     * {@link LVCInteractionService}
-     */
-    class LVCConfigReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (LVCInteractionService.LVC_RECEIVER_INTENT.equals(intent.getAction())) {
-                if (intent.hasExtra(LVCInteractionService.LVC_RECEIVER_FAILURE_REASON)) {
-                    // LVCInteractionService was unable to provide config from LVC
-                    String reason = intent.getStringExtra(LVCInteractionService.LVC_RECEIVER_FAILURE_REASON);
-                    onLVCConfigReceived(null);
-                    Log.e(TAG, "Failed to init LVC: " + reason);
-                } else if (intent.hasExtra(LVCInteractionService.LVC_RECEIVER_CONFIGURATION)) {
-                    // LVCInteractionService received config from LVC
-                    Log.i(TAG, "Received config from LVC, starting engine now");
-                    String config = intent.getStringExtra(LVCInteractionService.LVC_RECEIVER_CONFIGURATION);
-                    onLVCConfigReceived(config);
                 }
             }
         }
