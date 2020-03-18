@@ -25,7 +25,6 @@ import com.amazon.aace.alexa.AuthProvider;
 import com.amazon.aace.network.NetworkInfoProvider;
 import com.amazon.sampleapp.R;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkConnectionObserver;
-import com.amazon.sampleapp.logView.LogRecyclerViewAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;

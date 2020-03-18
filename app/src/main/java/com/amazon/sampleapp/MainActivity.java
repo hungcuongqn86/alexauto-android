@@ -62,7 +62,6 @@ import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkInfoProviderHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 import com.amazon.sampleapp.impl.SpeechRecognizer.SpeechRecognizerHandler;
 import com.amazon.sampleapp.impl.SpeechSynthesizer.SpeechSynthesizerHandler;
-import com.amazon.sampleapp.logView.LogRecyclerViewAdapter;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -118,11 +117,6 @@ public class MainActivity extends AppCompatActivity implements Observer {
 
     // Network
     private NetworkInfoProviderHandler mNetworkInfoProvider;
-
-    /* Log View Components */
-    private RecyclerView mRecyclerView;
-    private LogRecyclerViewAdapter mRecyclerAdapter;
-
     /* Shared Preferences */
     private SharedPreferences mPreferences;
 
