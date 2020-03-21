@@ -15,6 +15,7 @@ import android.media.MediaPlayer;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.amazon.aace.alexa.AlexaClient;
 import com.amazon.aace.alexa.config.AlexaConfiguration;
 import com.amazon.aace.core.CoreProperties;
 import com.amazon.aace.core.Engine;
@@ -372,6 +373,20 @@ public class AsvAlexaPlugin implements Observer {
         mAuthProvider.onInitialize();
 
         // initTapToTalk();
+    }
+
+    public void tapToTalk() {
+        if (mAlexaClient != null && mSpeechRecognizer != null) {
+            if (mAlexaClient.getConnectionStatus()
+                    == AlexaClient.ConnectionStatus.CONNECTED) {
+                mSpeechRecognizer.onTapToTalk();
+            } else {
+                // Notify Error state to AutoVoiceChrome
+                String message = "AlexaClient not connected. ConnectionStatus: "
+                        + mAlexaClient.getConnectionStatus();
+                Log.w("tapToTalk", message);
+            }
+        }
     }
 
     private ArrayList<EngineConfiguration> getEngineConfigurations(String json, File appDataDir, File certsDir, File modelsDir) {

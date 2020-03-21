@@ -15,7 +15,6 @@
 
 package com.amazon.sampleapp;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -25,50 +24,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.amazon.aace.alexa.AlexaClient;
-import com.amazon.aace.core.Engine;
-import com.amazon.sampleapp.impl.Alerts.AlertsHandler;
-import com.amazon.sampleapp.impl.AlexaClient.AlexaClientHandler;
-import com.amazon.sampleapp.impl.AlexaSpeaker.AlexaSpeakerHandler;
-import com.amazon.sampleapp.impl.Audio.AudioInputProviderHandler;
-import com.amazon.sampleapp.impl.Audio.AudioOutputProviderHandler;
-import com.amazon.sampleapp.impl.AudioPlayer.AudioPlayerHandler;
-import com.amazon.sampleapp.impl.AuthProvider.AuthProviderHandler;
-
-import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkInfoProviderHandler;
-import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
-import com.amazon.sampleapp.impl.SpeechRecognizer.SpeechRecognizerHandler;
-import com.amazon.sampleapp.impl.SpeechSynthesizer.SpeechSynthesizerHandler;
-
 public class MainActivity extends AppCompatActivity {
-    private static final String TAG = MainActivity.class.getSimpleName();
-    // Alexa
-    private AlertsHandler mAlerts;
-    private AlexaClientHandler mAlexaClient;
-    private AudioPlayerHandler mAudioPlayer;
-    private AuthProviderHandler mAuthProvider;
-    private PlaybackControllerHandler mPlaybackController;
-    private SpeechRecognizerHandler mSpeechRecognizer;
-    private SpeechSynthesizerHandler mSpeechSynthesizer;
-    private AlexaSpeakerHandler mAlexaSpeaker;
-
-    // Alexa Comms Handler
-
-    // LVC Handlers
-
-    // Core
-    private Engine mEngine;
-    private boolean mEngineStarted = false;
-
-    // Audio
-    private AudioInputProviderHandler mAudioInputProvider;
-    private AudioOutputProviderHandler mAudioOutputProvider;
-
-    // Network
-    private NetworkInfoProviderHandler mNetworkInfoProvider;
-    /* Shared Preferences */
-    private SharedPreferences mPreferences;
-
     /* Speech Recognition Components */
     private boolean mIsTalkButtonLongPressed = false;
     private MenuItem mTapToTalkIcon;
@@ -108,25 +64,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initTapToTalk() {
-        if (mTapToTalkIcon != null && mAlexaClient != null && mSpeechRecognizer != null) {
+        if (mTapToTalkIcon != null) {
             mTapToTalkIcon.setActionView(R.layout.menu_item_talk);
-
             // Set hold-to-talk action
             mTapToTalkIcon.getActionView().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (mAlexaClient.getConnectionStatus()
-                            == AlexaClient.ConnectionStatus.CONNECTED) {
-                        mSpeechRecognizer.onTapToTalk();
-                    } else {
-                        // Notify Error state to AutoVoiceChrome
-                        String message = "AlexaClient not connected. ConnectionStatus: "
-                                + mAlexaClient.getConnectionStatus();
-                        Log.w(TAG, message);
-                    }
+                    asvAlexaPlugin.tapToTalk();
                 }
             });
 
+            /*
             // Start hold-to-talk button action
             mTapToTalkIcon.getActionView().setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
@@ -156,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
                     return false;
                 }
             });
+            */
         }
     }
 }
