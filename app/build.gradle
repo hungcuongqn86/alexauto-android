@@ -1,13 +1,10 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "com.amazon.sampleapp"
         minSdkVersion 22
         targetSdkVersion 26
-        versionCode 1
-        versionName "2.0"
     }
     buildTypes {
         release {
@@ -67,3 +64,18 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer-hls:2.7.1'
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
 }
+// task to delete the old jar
+task deleteOldJar(type: Delete) {
+    delete'release/AsvAlexaPlugin.jar'
+}
+
+// task to export contents as jar
+task exportJar(type: Copy) {
+    from('build/intermediates/packaged-classes/remote/release/')
+    into('release')
+    include('classes.jar')
+    // name the plugin
+    rename('classes.jar','AsvAlexaPlugin.jar')
+}
+
+exportJar.dependsOn(deleteOldJar, build)

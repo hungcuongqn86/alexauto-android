@@ -111,49 +111,58 @@ public class AsvAlexaPlugin implements Observer {
         return res;
     }
 
-    public void create() {
-        initLVC();
+    public String create() {
+        try {
+            initLVC();
 
-        int wakesoundId = mContext.getResources().getIdentifier("med_ui_wakesound", "raw", mActivity.getPackageName());
-        int wakesounTouchId = mContext.getResources().getIdentifier("med_ui_wakesound_touch", "raw", mActivity.getPackageName());
-        int endpointingTouchId = mContext.getResources().getIdentifier("med_ui_endpointing_touch", "raw", mActivity.getPackageName());
+            int wakesoundId = mContext.getResources().getIdentifier("med_ui_wakesound", "raw", mActivity.getPackageName());
+            int wakesounTouchId = mContext.getResources().getIdentifier("med_ui_wakesound_touch", "raw", mActivity.getPackageName());
+            int endpointingTouchId = mContext.getResources().getIdentifier("med_ui_endpointing_touch", "raw", mActivity.getPackageName());
 
-        // Initialize sound effects for speech recognition
-        mAudioCueStartVoice = MediaPlayer.create(mContext, wakesoundId);
-        mAudioCueStartTouch = MediaPlayer.create(mContext, wakesounTouchId);
-        mAudioCueEnd = MediaPlayer.create(mContext, endpointingTouchId);
+            // Initialize sound effects for speech recognition
+            mAudioCueStartVoice = MediaPlayer.create(mContext, wakesoundId);
+            mAudioCueStartTouch = MediaPlayer.create(mContext, wakesounTouchId);
+            mAudioCueEnd = MediaPlayer.create(mContext, endpointingTouchId);
 
-        // Get shared preferences
-        int preferenceFileKeyId = mContext.getResources().getIdentifier("preference_file_key", "string", mActivity.getPackageName());
-        mPreferences = mContext.getSharedPreferences(mContext.getString(preferenceFileKeyId),
-                Context.MODE_PRIVATE);
+            // Get shared preferences
+            int preferenceFileKeyId = mContext.getResources().getIdentifier("preference_file_key", "string", mActivity.getPackageName());
+            mPreferences = mContext.getSharedPreferences(mContext.getString(preferenceFileKeyId),
+                    Context.MODE_PRIVATE);
 
-        // Retrieve device config from config file and update preferences
-        String clientId = "", productId = "", productDsn = "";
-        JSONObject config = FileUtils.getConfigFromFile(mContext.getAssets(), sDeviceConfigFile, "config");
-        if (config != null) {
-            try {
-                clientId = config.getString("clientId");
-                productId = config.getString("productId");
-                Log.i("AsvAlexaPlugin.create", "clientId: " + clientId + " - productId: " + productId + " - productDsn: " + productDsn);
-            } catch (JSONException e) {
-                Log.w("AsvAlexaPlugin.create", "Missing device info in app_config.json");
-            }
-            try {
-                productDsn = config.getString("productDsn");
-            } catch (JSONException e) {
+            // Retrieve device config from config file and update preferences
+            String clientId = "", productId = "", productDsn = "";
+            JSONObject config = FileUtils.getConfigFromFile(mContext.getAssets(), sDeviceConfigFile, "config");
+            if (config != null) {
                 try {
-                    // set Android ID as product DSN
-                    productDsn = Settings.Secure.getString(mContext.getContentResolver(),
-                            Settings.Secure.ANDROID_ID);
-                    Log.i("AsvAlexaPlugin.create", "android id for DSN: " + productDsn);
-                } catch (Error error) {
-                    productDsn = UUID.randomUUID().toString();
-                    Log.w("AsvAlexaPlugin.create", "android id not found, generating random DSN: " + productDsn);
+                    clientId = config.getString("clientId");
+                    productId = config.getString("productId");
+                    Log.i("AsvAlexaPlugin.create", "clientId: " + clientId + " - productId: " + productId + " - productDsn: " + productDsn);
+                } catch (JSONException e) {
+                    Log.w("AsvAlexaPlugin.create", "Missing device info in app_config.json");
+                    throw new RuntimeException("Missing device info in app_config.json");
+                }
+
+                try {
+                    productDsn = config.getString("productDsn");
+                } catch (JSONException e) {
+                    try {
+                        // set Android ID as product DSN
+                        productDsn = Settings.Secure.getString(mContext.getContentResolver(),
+                                Settings.Secure.ANDROID_ID);
+                        Log.i("AsvAlexaPlugin.create", "android id for DSN: " + productDsn);
+                    } catch (Error error) {
+                        productDsn = UUID.randomUUID().toString();
+                        Log.w("AsvAlexaPlugin.create", "android id not found, generating random DSN: " + productDsn);
+                        throw new RuntimeException("android id not found");
+                    }
                 }
             }
+            updateDevicePreferences(clientId, productId, productDsn);
+
+            return "Create OK!";
+        } catch (RuntimeException e) {
+            return e.getMessage();
         }
-        updateDevicePreferences(clientId, productId, productDsn);
     }
 
     private void updateDevicePreferences(String clientId,
@@ -236,6 +245,7 @@ public class AsvAlexaPlugin implements Observer {
             Log.i("initLVC", "initLVC success!");
         } catch (RuntimeException e) {
             Log.w("initLVC", "initLVC error:" + e.getMessage());
+            throw e;
         }
     }
 
@@ -375,17 +385,21 @@ public class AsvAlexaPlugin implements Observer {
         // initTapToTalk();
     }
 
-    public void tapToTalk() {
+    public String tapToTalk() {
         if (mAlexaClient != null && mSpeechRecognizer != null) {
             if (mAlexaClient.getConnectionStatus()
                     == AlexaClient.ConnectionStatus.CONNECTED) {
                 mSpeechRecognizer.onTapToTalk();
+                return "TapToTalk OK.";
             } else {
                 // Notify Error state to AutoVoiceChrome
                 String message = "AlexaClient not connected. ConnectionStatus: "
                         + mAlexaClient.getConnectionStatus();
                 Log.w("tapToTalk", message);
+                return message;
             }
+        }else{
+            return "AlexaClient not init.";
         }
     }
 
