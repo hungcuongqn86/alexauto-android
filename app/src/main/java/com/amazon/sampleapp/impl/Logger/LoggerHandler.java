@@ -18,7 +18,7 @@ package com.amazon.sampleapp.impl.Logger;
 import android.graphics.Color;
 import android.util.Log;
 
-import com.amazon.aace.logger.Logger;
+import com.amazon.sampleapp.aace.logger.Logger;
 // import com.amazon.sampleapp.logView.LogEntry;
 // import com.amazon.sampleapp.logView.LogRecyclerViewAdapter;
 

@@ -18,7 +18,7 @@ package com.amazon.sampleapp.impl.Alerts;
 import android.app.Activity;
 import android.widget.TextView;
 
-import com.amazon.aace.alexa.Alerts;
+import com.amazon.sampleapp.aace.alexa.Alerts;
 
 public class AlertsHandler extends Alerts {
 

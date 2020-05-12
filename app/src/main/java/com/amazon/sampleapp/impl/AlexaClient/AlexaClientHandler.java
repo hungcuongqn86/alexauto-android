@@ -18,7 +18,7 @@ package com.amazon.sampleapp.impl.AlexaClient;
 import android.app.Activity;
 import android.widget.TextView;
 
-import com.amazon.aace.alexa.AlexaClient;
+import com.amazon.sampleapp.aace.alexa.AlexaClient;
 
 public class AlexaClientHandler extends AlexaClient {
 

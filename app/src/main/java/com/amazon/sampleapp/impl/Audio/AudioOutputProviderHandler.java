@@ -2,8 +2,8 @@ package com.amazon.sampleapp.impl.Audio;
 
 import android.app.Activity;
 
-import com.amazon.aace.audio.AudioOutput;
-import com.amazon.aace.audio.AudioOutputProvider;
+import com.amazon.sampleapp.aace.audio.AudioOutput;
+import com.amazon.sampleapp.aace.audio.AudioOutputProvider;
 
 import java.util.HashMap;
 

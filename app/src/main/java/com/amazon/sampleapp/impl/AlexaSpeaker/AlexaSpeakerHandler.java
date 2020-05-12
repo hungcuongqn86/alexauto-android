@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.amazon.aace.alexa.AlexaSpeaker;
+import com.amazon.sampleapp.aace.alexa.AlexaSpeaker;
 
 public class AlexaSpeakerHandler extends AlexaSpeaker
 {

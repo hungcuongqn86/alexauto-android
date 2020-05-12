@@ -27,9 +27,9 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 
-import com.amazon.aace.core.Engine;
-import com.amazon.aace.network.NetworkInfoProvider;
-import com.amazon.aace.network.NetworkProperties;
+import com.amazon.sampleapp.aace.core.Engine;
+import com.amazon.sampleapp.aace.network.NetworkInfoProvider;
+import com.amazon.sampleapp.aace.network.NetworkProperties;
 
 import java.util.HashSet;
 import java.util.Set;

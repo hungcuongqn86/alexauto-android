@@ -17,7 +17,7 @@ package com.amazon.sampleapp.impl.SpeechRecognizer;
 
 import android.app.Activity;
 
-import com.amazon.aace.alexa.SpeechRecognizer;
+import com.amazon.sampleapp.aace.alexa.SpeechRecognizer;
 
 import java.util.Observable;
 import java.util.Observer;

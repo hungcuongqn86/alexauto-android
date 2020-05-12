@@ -18,8 +18,8 @@ package com.amazon.sampleapp.impl.AudioPlayer;
 import android.os.Handler;
 import android.os.Message;
 
-import com.amazon.aace.alexa.AudioPlayer;
-import com.amazon.aace.audio.AudioOutput;
+import com.amazon.sampleapp.aace.alexa.AudioPlayer;
+import com.amazon.sampleapp.aace.audio.AudioOutput;
 import com.amazon.sampleapp.impl.Audio.AudioOutputProviderHandler;
 import com.amazon.sampleapp.impl.PlaybackController.PlaybackControllerHandler;
 

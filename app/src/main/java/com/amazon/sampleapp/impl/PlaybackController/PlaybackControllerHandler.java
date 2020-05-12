@@ -22,8 +22,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import com.amazon.aace.alexa.PlaybackController;
-import com.amazon.aace.audio.AudioOutput;
+import com.amazon.sampleapp.aace.alexa.PlaybackController;
+import com.amazon.sampleapp.aace.audio.AudioOutput;
 
 import java.util.Formatter;
 import java.util.Locale;

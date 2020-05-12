@@ -21,8 +21,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 
-import com.amazon.aace.alexa.AuthProvider;
-import com.amazon.aace.network.NetworkInfoProvider;
+import com.amazon.sampleapp.aace.alexa.AuthProvider;
+import com.amazon.sampleapp.aace.network.NetworkInfoProvider;
 import com.amazon.sampleapp.R;
 import com.amazon.sampleapp.impl.NetworkInfoProvider.NetworkConnectionObserver;
 

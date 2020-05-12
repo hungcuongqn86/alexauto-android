@@ -15,14 +15,14 @@ import android.media.MediaPlayer;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.amazon.aace.alexa.AlexaClient;
-import com.amazon.aace.alexa.config.AlexaConfiguration;
-import com.amazon.aace.core.CoreProperties;
-import com.amazon.aace.core.Engine;
-import com.amazon.aace.core.config.ConfigurationFile;
-import com.amazon.aace.core.config.EngineConfiguration;
-import com.amazon.aace.storage.config.StorageConfiguration;
-import com.amazon.aace.vehicle.config.VehicleConfiguration;
+import com.amazon.sampleapp.aace.alexa.AlexaClient;
+import com.amazon.sampleapp.aace.alexa.config.AlexaConfiguration;
+import com.amazon.sampleapp.aace.core.CoreProperties;
+import com.amazon.sampleapp.aace.core.Engine;
+import com.amazon.sampleapp.aace.core.config.ConfigurationFile;
+import com.amazon.sampleapp.aace.core.config.EngineConfiguration;
+import com.amazon.sampleapp.aace.storage.config.StorageConfiguration;
+import com.amazon.sampleapp.aace.vehicle.config.VehicleConfiguration;
 import com.amazon.sampleapp.impl.Alerts.AlertsHandler;
 import com.amazon.sampleapp.impl.AlexaClient.AlexaClientHandler;
 import com.amazon.sampleapp.impl.AlexaSpeaker.AlexaSpeakerHandler;
@@ -409,13 +409,6 @@ public class AsvAlexaPlugin implements Observer {
         String clientId = mPreferences.getString(mContext.getString(R.string.preference_client_id), "");
         String productId = mPreferences.getString(mContext.getString(R.string.preference_product_id), "");
 
-        AlexaConfiguration.TemplateRuntimeTimeout[] timeoutList = new AlexaConfiguration.TemplateRuntimeTimeout[]{
-                new AlexaConfiguration.TemplateRuntimeTimeout(AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_TTS_FINISHED_TIMEOUT, 8000),
-                new AlexaConfiguration.TemplateRuntimeTimeout(AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_AUDIO_PLAYBACK_FINISHED_TIMEOUT, 8000),
-                new AlexaConfiguration.TemplateRuntimeTimeout(AlexaConfiguration.TemplateRuntimeTimeoutType.DISPLAY_CARD_AUDIO_PLAYBACK_STOPPED_PAUSED_TIMEOUT, 1800000)
-        };
-
-        JSONObject config = null;
         ArrayList<EngineConfiguration> configuration = new ArrayList<EngineConfiguration>(Arrays.asList(
                 //AlexaConfiguration.createCurlConfig( certsDir.getPath(), "wlan0" ), Uncomment this line to specify the interface name to use by AVS.
                 AlexaConfiguration.createCurlConfig(certsDir.getPath()),

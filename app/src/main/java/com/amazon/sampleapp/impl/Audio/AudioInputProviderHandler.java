@@ -2,8 +2,8 @@ package com.amazon.sampleapp.impl.Audio;
 
 import android.app.Activity;
 
-import com.amazon.aace.audio.AudioInput;
-import com.amazon.aace.audio.AudioInputProvider;
+import com.amazon.sampleapp.aace.audio.AudioInput;
+import com.amazon.sampleapp.aace.audio.AudioInputProvider;
 
 public class AudioInputProviderHandler extends AudioInputProvider
 {

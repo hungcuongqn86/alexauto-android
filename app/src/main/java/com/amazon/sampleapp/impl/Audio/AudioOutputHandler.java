@@ -19,11 +19,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
 
-import com.amazon.aace.alexa.AuthProvider.AuthState;
-import com.amazon.aace.alexa.AuthProvider.AuthError;
+import com.amazon.sampleapp.aace.alexa.AuthProvider.AuthState;
+import com.amazon.sampleapp.aace.alexa.AuthProvider.AuthError;
 
-import com.amazon.aace.audio.AudioOutput;
-import com.amazon.aace.audio.AudioStream;
+import com.amazon.sampleapp.aace.audio.AudioOutput;
+import com.amazon.sampleapp.aace.audio.AudioStream;
 import com.amazon.sampleapp.impl.AuthProvider.AuthStateObserver;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlaybackException;

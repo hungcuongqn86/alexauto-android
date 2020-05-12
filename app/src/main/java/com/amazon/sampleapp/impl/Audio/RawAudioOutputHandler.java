@@ -21,8 +21,8 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.support.annotation.Nullable;
 
-import com.amazon.aace.audio.AudioOutput;
-import com.amazon.aace.audio.AudioStream;
+import com.amazon.sampleapp.aace.audio.AudioOutput;
+import com.amazon.sampleapp.aace.audio.AudioStream;
 
 /**
  * A @c AudioOutput capable to play raw PCM 16 bit data @ 16 KHZ.

@@ -20,7 +20,7 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
-import com.amazon.aace.audio.AudioInput;
+import com.amazon.sampleapp.aace.audio.AudioInput;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
